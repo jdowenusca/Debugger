@@ -1,0 +1,378 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background: #111;
+  color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ---------- TITLE SCREEN ---------- */
+
+#title-screen {
+  position: fixed;
+  inset: 0;
+  background: #050507;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: opacity 0.6s ease;
+}
+
+#title-screen.background-mode {
+  opacity: 0;
+  pointer-events: none; /* ignore mouse after game starts */
+}
+
+#title-content {
+  text-align: center;
+}
+
+#title-logo {
+  width: 320px;
+  max-width: 80vw;
+  height: auto;
+  margin-bottom: 24px;
+}
+
+#title-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+#title-buttons button {
+  min-width: 180px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #666;
+  background: #262626;
+  color: #f5f5f5;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+#title-buttons button:hover {
+  background: #333;
+  box-shadow: 0 0 10px rgba(0, 255, 150, 0.4);
+  transform: translateY(-1px);
+}
+
+#title-buttons button:active {
+  transform: translateY(1px);
+}
+
+/* ---------- MAIN GAME LAYOUT ---------- */
+
+#game-container {
+  width: 960px;
+  max-width: 100%;
+  background: #1e1e1e;
+  border: 2px solid #444;
+  border-radius: 8px;
+  padding: 16px;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  z-index: 5;
+}
+
+#game-container.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+#game-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 8px;
+  margin-bottom: 12px;
+}
+
+#logo-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+#game-logo {
+  height: 48px;
+  opacity: 0.9;
+}
+
+#stats span {
+  margin-left: 16px;
+}
+
+#game-main {
+  display: grid;
+  grid-template-columns: 1fr 3fr 1fr; /* Weapons | Play | Upgrades */
+  gap: 12px;
+}
+
+#pause-button {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #222;
+  color: #f5f5f5;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  line-height: 1;
+  min-width: 40px;
+  text-align: center;
+}
+
+#pause-button:hover {
+  background: #333;
+}
+
+/* Play area where bugs will appear */
+#play-area {
+  position: relative;
+  height: 480px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  overflow: hidden;
+
+  /* Faint grid */
+  background-color: #ff5d57;
+  background-image:
+    linear-gradient(#333 1px, transparent 1px),
+    linear-gradient(90deg, #333 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: 0 0;
+
+  /* Hide system cursor when inside play area */
+  /*cursor: none;*/
+}
+
+/* Swatter cursor */
+#swatter-cursor {
+  position: absolute;
+  pointer-events: none;
+  display: none;
+  transition: transform 0.05s ease;
+  transform-origin: center center;
+}
+
+/* Swat animation: just rotation now */
+#swatter-cursor.swat {
+  transform: rotate(-30deg);
+}
+
+/* Sidebar for upgrades */
+#upgrade-panel {
+  background: #181818;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+#upgrade-panel h2 {
+  margin-bottom: 8px;
+}
+
+#weapon-panel {
+  background: #181818;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+#weapon-panel h2 {
+  margin-bottom: 8px;
+}
+
+#weapon-panel button {
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #666;
+  background: #262626;
+  color: #f5f5f5;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+#weapon-panel button:hover {
+  background: #333;
+}
+
+#weapon-panel button.active {
+  background: #3c7040;
+  border-color: #53a35a;
+}
+
+/* ---------- OVERLAY PANELS (JOURNAL & OPTIONS) ---------- */
+
+.overlay-panel {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.overlay-panel.active {
+  display: flex;
+  animation: fadeInPanel 0.3s ease;
+}
+
+.panel-content {
+  background: #181818;
+  border-radius: 8px;
+  border: 1px solid #555;
+  padding: 20px;
+  max-width: 640px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.panel-content h2 {
+  margin-bottom: 12px;
+}
+
+.journal-section {
+  margin-top: 12px;
+}
+
+.journal-section h3 {
+  margin-bottom: 4px;
+}
+
+.close-btn {
+  margin-top: 16px;
+  padding: 8px 16px;
+  background: #333;
+  color: #f5f5f5;
+  border: 1px solid #666;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background: #444;
+}
+
+.pause-content h2 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.pause-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  margin-top: 8px;
+}
+
+.pause-buttons button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #666;
+  background: #262626;
+  color: #f5f5f5;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.pause-buttons button:hover {
+  background: #333;
+}
+
+
+/* Options sliders */
+.option-row {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.option-row input[type="range"] {
+  width: 100%;
+}
+
+.option-note {
+  margin-top: 14px;
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
+/* Make pause below, journal/options above */
+#pause-screen {
+  z-index: 20;
+}
+
+#journal-screen,
+#options-screen {
+  z-index: 30;
+}
+
+.pause-content h2 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.pause-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  margin-top: 8px;
+}
+
+.pause-buttons button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #666;
+  background: #262626;
+  color: #f5f5f5;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.pause-buttons button:hover {
+  background: #333;
+}
+
+.bug {
+  position: absolute;
+  pointer-events: none; /* swatter needs clean hit detection */
+  user-select: none;
+  transform-origin: center center; /* rotate around center */
+}
+
+/* ---------- ANIMATIONS ---------- */
+
+@keyframes fadeInPanel {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
