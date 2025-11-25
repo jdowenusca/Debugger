@@ -35,6 +35,8 @@ const equipHammerBtn = document.getElementById("equip-hammer");
 let isPaused = true;       // Game starts paused!
 let gameStarted = false;   // Prevent spawns until DEBUG is pressed
 let activeBugs = [];
+let activePowerupPickups = [];
+window.activeBugs = activeBugs; // keep in sync when you modify activeBugs
 let money = 0;
 let bugsKilled = 0;
 
@@ -136,6 +138,94 @@ function closeOptions() {
     optionsScreen.classList.remove("active");
   }
 }
+
+// --------------------
+//  POWERUP DROP LOGIC 
+// --------------------
+
+const powerupDropTable = [
+  { id: "decreaseWCD", classRef: DecreaseWCDPowerup, weight: 3 },
+  { id: "increaseAttack", classRef: IncreaseAttackPowerup, weight: 3 },
+  { id: "increaseMoney", classRef: IncreaseMoneyPowerup, weight: 2 },
+  { id: "bbb", classRef: BigBugBombPowerup, weight: 1 },
+];
+
+// Chance that ANY powerup drops on a bug kill (0.0 - 1.0)
+const overallPowerupDropChance = 0.5; // 50%, tweak as you like
+
+function pickWeightedPowerupEntry() {
+  const totalWeight = powerupDropTable.reduce((sum, entry) => sum + entry.weight, 0);
+  const r = Math.random() * totalWeight;
+  let acc = 0;
+  for (const entry of powerupDropTable) {
+    acc += entry.weight;
+    if (r <= acc) return entry;
+  }
+  return powerupDropTable[powerupDropTable.length - 1];
+}
+
+function spawnPowerupPickup(entry, x, y) {
+  if (!playArea) return;
+
+  const img = document.createElement("img");
+  img.classList.add("powerup-pickup");
+
+  // Use the static sprite from the class
+  img.src = entry.classRef.sprite || "../IMG/powerups/default.png";
+
+  img.style.position = "absolute";
+  img.style.left = x + "px";
+  img.style.top = y + "px";
+  img.style.transform = "translate(-50%, -50%)";
+  img.style.width = "32px"; // tweak
+  img.style.height = "32px";
+  img.style.cursor = "pointer";
+
+  playArea.appendChild(img);
+
+  const pickup = { entry, el: img };
+  activePowerupPickups.push(pickup);
+
+  // Click to collect
+  img.addEventListener("click", (event) => {
+    event.stopPropagation(); // don't also trigger a swat
+    activatePowerup(entry);
+    img.remove();
+    activePowerupPickups = activePowerupPickups.filter(p => p !== pickup);
+  });
+
+  // Optional: auto-despawn after some time
+  setTimeout(() => {
+    if (pickup.el.parentElement) {
+      pickup.el.remove();
+      activePowerupPickups = activePowerupPickups.filter(p => p !== pickup);
+    }
+  }, 10000); // 10 seconds to pick up
+}
+
+function activatePowerup(entry) {
+  let powerupInstance;
+
+  switch (entry.id) {
+    case "decreaseWCD":
+      powerupInstance = new DecreaseWCDPowerup(currentWeapon);
+      break;
+    case "increaseAttack":
+      powerupInstance = new IncreaseAttackPowerup(currentWeapon);
+      break;
+    case "increaseMoney":
+      powerupInstance = new IncreaseMoneyPowerup();
+      break;
+    case "bbb":
+      powerupInstance = new BigBugBombPowerup();
+      break;
+    default:
+      return;
+  }
+
+  powerupInstance.activate();
+}
+
 
 // --------------------
 //  UPGRADE FUNCTIONS
@@ -325,16 +415,19 @@ function handleSwat(event) {
   const hitX = event.offsetX;
   const hitY = event.offsetY;
 
-  // Ask the weapon if it can attack (cooldown)
-  const { didAttack, moneyGained, bugsKilled: kills } =
-    currentWeapon.tryAttack(hitX, hitY, activeBugs);
+  // Try attack (respects cooldown)
+  const {
+    didAttack,
+    moneyGained,
+    bugsKilled: kills,
+    killedBugCenters
+  } = currentWeapon.tryAttack(hitX, hitY, activeBugs);
 
-  // If we’re still on cooldown, do nothing
   if (!didAttack) {
     return;
   }
 
-  // Swat animation ONLY when an attack actually happens
+  // Swat animation ONLY if we actually swung
   if (swatter) {
     swatter.classList.add("swat");
     setTimeout(() => {
@@ -348,8 +441,21 @@ function handleSwat(event) {
     updateStatsUI();
   }
 
+  // Powerup drop logic
+  if (kills > 0 && killedBugCenters.length > 0) {
+    // Roll chance that ANY powerup drops
+    if (Math.random() < overallPowerupDropChance) {
+      const entry = pickWeightedPowerupEntry();
+      // Pick one of the killed bugs at random
+      const chosenCenter =
+        killedBugCenters[Math.floor(Math.random() * killedBugCenters.length)];
+      spawnPowerupPickup(entry, chosenCenter.cx, chosenCenter.cy);
+    }
+  }
+
   // Clean out dead bugs
   activeBugs = activeBugs.filter((b) => !b.isDead);
+  window.activeBugs = activeBugs; // keep BBB etc. in sync
 }
 
 // ----------------------

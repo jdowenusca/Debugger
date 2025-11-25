@@ -34,17 +34,28 @@ class BaseWeapon {
 
   tryAttack(hitX, hitY, bugs, now = performance.now()) {
     if (!this.canAttack(now)) {
-      return { didAttack: false, moneyGained: 0, bugsKilled: 0 };
+      return {
+        didAttack: false,
+        moneyGained: 0,
+        bugsKilled: 0,
+        killedBugCenters: []
+      };
     }
 
     this.lastAttackTime = now;
-    const { moneyGained, bugsKilled } = this.attack(hitX, hitY, bugs);
-    return { didAttack: true, moneyGained, bugsKilled };
+    const result = this.attack(hitX, hitY, bugs);
+    return {
+      didAttack: true,
+      moneyGained: result.moneyGained,
+      bugsKilled: result.bugsKilled,
+      killedBugCenters: result.killedBugCenters
+    };
   }
 
   attack(hitX, hitY, bugs) {
     let moneyGained = 0;
     let bugsKilled = 0;
+    const killedBugCenters = []; // NEW: track where killed bugs were
 
     bugs.forEach((bug) => {
       if (bug.isDead) return;
@@ -61,11 +72,12 @@ class BaseWeapon {
         if (wasAlive && bug.isDead) {
           moneyGained += bug.reward;
           bugsKilled += 1;
+          // Save the position where this bug died
+          killedBugCenters.push({ cx, cy });
         }
       }
-    });
-
-    return { moneyGained, bugsKilled };
+  });
+    return { moneyGained, bugsKilled, killedBugCenters };
   }
 }
 

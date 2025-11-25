@@ -360,6 +360,14 @@ body {
   background: #333;
 }
 
+.powerup-pickup {
+  position: absolute;
+  pointer-events: auto;
+  user-select: none;
+  transform: translate(-50%, -50%);
+  z-index: 15; /* above bugs, below menus */
+}
+
 .bug {
   position: absolute;
   pointer-events: none; /* swatter needs clean hit detection */
