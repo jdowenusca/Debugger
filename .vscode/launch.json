@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "chrome",
+            "type": "msedge",
             "request": "launch",
             "name": "Open index.html",
             "file": "c:\\Users\\iefer\\Documents\\Classes\\CSCI225\\Debugger\\html\\index.html"

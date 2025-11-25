@@ -306,10 +306,16 @@ if (playArea && swatter) {
 
   // Swat on click
   playArea.addEventListener("click", (event) => {
+    swatter.style.userSelect = "none";
+    event.preventDefault();
+
     if (isPaused) return;
     handleSwat(event);
   });
-     swatter.style.userSelect = "none";
+
+  playArea.addEventListener("mousedown", (event) => {
+    event.preventDefault();
+  });
 }
 
 
