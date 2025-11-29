@@ -151,7 +151,7 @@ const powerupDropTable = [
 ];
 
 // Chance that ANY powerup drops on a bug kill (0.0 - 1.0)
-const overallPowerupDropChance = 0.5; // 50%, tweak as you like
+const overallPowerupDropChance = 0.1; // 10% chance
 
 function pickWeightedPowerupEntry() {
   const totalWeight = powerupDropTable.reduce((sum, entry) => sum + entry.weight, 0);
@@ -380,8 +380,11 @@ if (playArea && swatter) {
   });
 
   playArea.addEventListener("mousemove", (event) => {
-    const baseX = event.offsetX;
-    const baseY = event.offsetY;
+    const rect = playArea.getBoundingClientRect();
+
+    // Mouse position relative to playArea’s top-left corner
+    const baseX = event.clientX - rect.left;
+    const baseY = event.clientY - rect.top;
 
     const offsetX = currentWeapon?.cursorOffsetX ?? 0;
     const offsetY = currentWeapon?.cursorOffsetY ?? 0;
@@ -389,6 +392,7 @@ if (playArea && swatter) {
     swatter.style.left = baseX + offsetX + "px";
     swatter.style.top = baseY + offsetY + "px";
   });
+
 
   playArea.addEventListener("mouseleave", () => {
     swatter.style.display = "none";

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Debugger - Bug Swatter Idle Game</title>
@@ -8,6 +9,7 @@
   <!-- Link to CSS styles -->
   <link rel="stylesheet" href="../CSS/style.css" />
 </head>
+
 <body>
   <!-- Title Screen -->
   <div id="title-screen">
@@ -25,17 +27,17 @@
   <!-- Main Game Container -->
   <div id="game-container">
     <header id="game-header">
-  <button id="pause-button" title="Pause">||</button>
+      <button id="pause-button" title="Pause">||</button>
 
-  <div id="logo-wrapper">
-    <img id="game-logo" src="../IMG/logo.png" alt="Game Logo">
-  </div>
+      <div id="logo-wrapper">
+        <img id="game-logo" src="../IMG/logo.png" alt="Game Logo">
+      </div>
 
-  <div id="stats">
-    <span id="money-display">Money: $0</span>
-    <span id="bugs-killed-display">Bugs killed: 0</span>
-  </div>
-</header>
+      <div id="stats">
+        <span id="money-display">Money: $0</span>
+        <span id="bugs-killed-display">Bugs killed: 0</span>
+      </div>
+    </header>
 
     <main id="game-main">
       <!-- Weapons panel on the left -->
@@ -44,12 +46,12 @@
         <button id="equip-swatter">Swatter</button>
         <button id="equip-hammer">Hammer</button>
       </aside>
-    
+
       <!-- Play area in the center -->
       <div id="play-area" draggable="false">
         <img id="swatter-cursor" src="../IMG/swatter.png" alt="Swatter">
       </div>
-    
+
       <!-- Upgrades panel on the right -->
       <aside id="upgrade-panel">
         <h2>Upgrades</h2>
@@ -111,17 +113,17 @@
   </div>
 
   <!-- Pause Screen -->
-<div id="pause-screen" class="overlay-panel">
-  <div class="panel-content pause-content">
-    <h2>Paused</h2>
+  <div id="pause-screen" class="overlay-panel">
+    <div class="panel-content pause-content">
+      <h2>Paused</h2>
 
-    <div class="pause-buttons">
-      <button id="btn-rebug">REBUG</button>
-      <button id="btn-pause-journal">Journal</button>
-      <button id="btn-quit">Quit</button>
+      <div class="pause-buttons">
+        <button id="btn-rebug">REBUG</button>
+        <button id="btn-pause-journal">Journal</button>
+        <button id="btn-quit">Quit</button>
+      </div>
     </div>
   </div>
-</div>
 
   <!-- Scripts of JS files -->
   <script src="../JS/bugs.js"></script>
@@ -130,4 +132,5 @@
   <script src="../JS/game.js"></script>
 
 </body>
+
 </html>

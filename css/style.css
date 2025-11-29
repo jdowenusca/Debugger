@@ -172,6 +172,7 @@ body {
   display: none;
   transition: transform 0.05s ease;
   transform-origin: center center;
+  z-index: 10;
 }
 
 /* Swat animation: just rotation now */
@@ -366,6 +367,14 @@ body {
   user-select: none;
   transform: translate(-50%, -50%);
   z-index: 15; /* above bugs, below menus */
+}
+
+#money-display,
+#bugs-killed-display {
+  display: inline-block;
+  min-width: 120px;  /* adjust for however big the numbers get */
+  text-align: right;  /* keeps numbers aligned nicely */
+  font-family: monospace;
 }
 
 .bug {
