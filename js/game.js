@@ -18,6 +18,7 @@ const journalScreen = document.getElementById("journal-screen");
 const optionsScreen = document.getElementById("options-screen");
 const closeJournalBtn = document.getElementById("close-journal");
 const closeOptionsBtn = document.getElementById("close-options");
+const quitGameBtn = document.getElementById("btn-quit-game");
 
 const pauseScreen = document.getElementById("pause-screen");
 const pauseButton = document.getElementById("pause-button");
@@ -137,6 +138,26 @@ function closeOptions() {
   if (optionsScreen) {
     optionsScreen.classList.remove("active");
   }
+}
+
+if (quitGameBtn) {
+  quitGameBtn.addEventListener("click", () => {
+    quitGameCompletely();
+  });
+}
+
+function quitGameCompletely() {
+  // Attempt to close the tab
+  window.open('', '_self', '');
+  window.close();
+
+  // If that fails, fallback
+  document.body.innerHTML = `
+    <div style="text-align:center; padding-top:50px; color:white; font-size:24px;">
+      <p>Thank you for playing Debugger!</p>
+      <p>You may close this tab now.</p>
+    </div>
+  `;
 }
 
 // --------------------
@@ -323,28 +344,34 @@ function resumeGame() {
 }
 
 function quitToTitle() {
+  // Close all overlays
+  if (pauseScreen) pauseScreen.classList.remove("active");
+  if (journalScreen) journalScreen.classList.remove("active");
+  if (optionsScreen) optionsScreen.classList.remove("active");
+
   // Reset flags
   isPaused = true;
   gameStarted = false;
 
   // Clear bugs
-  activeBugs.forEach((bug) => bug.die());
+  activeBugs.forEach(bug => bug.die());
   activeBugs = [];
+  window.activeBugs = activeBugs;
 
   // Reset stats
   money = 0;
   bugsKilled = 0;
   updateStatsUI();
 
-  // Reset weapon and multipliers
-  currentWeapon = new SwatterWeapon();
-  window.moneyMultiplier = 1;
-
   // Hide game
-  gameContainer.classList.remove("active");
+  if (gameContainer) {
+    gameContainer.classList.remove("active");
+  }
 
   // Restore full title screen
-  titleScreen.classList.remove("background-mode");
+  if (titleScreen) {
+    titleScreen.classList.remove("background-mode");
+  }
 }
 
 //--------------------------------
@@ -366,7 +393,10 @@ if (btnPauseJournal) {
 }
 
 if (btnQuit) {
-  btnQuit.addEventListener("click", quitToTitle);
+  btnQuit.addEventListener("click", (event) => {
+    event.stopPropagation();
+    quitToTitle();
+  });
 }
 
 
