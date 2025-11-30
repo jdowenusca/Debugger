@@ -40,7 +40,8 @@ class BaseBug {
     size = 40,            // Size (SZ)
     img = "../IMG/bugs/default.png",
     reward = 1,           // Money gained on kill
-    pathChangeChance = 0.02 // Chance each tick to pick a new path
+    pathChangeChance = 0.02, // Chance each tick to pick a new path
+    score = 1
   } = {}) {
 
     this.playArea = playArea;
@@ -52,7 +53,9 @@ class BaseBug {
     this.size = size;
     this.reward = reward;
     this.pathChangeChance = pathChangeChance;
+    this.score = score;
 
+    // State
     this.isDead = false;
 
     // Direction vector
@@ -166,6 +169,10 @@ class BaseBug {
     this.isDead = true;
     clearInterval(this.moveInterval);
     this.el.remove();
+
+    if (typeof window.updateBugMeterFromBugDeath === "function") {
+      window.updateBugMeterFromBugDeath(this);
+    }
   }
 }
 
@@ -182,7 +189,8 @@ class AntBug extends BaseBug {
       size: 28,
       img: "../IMG/bugs/ant/antBase.png",
       reward: 1,
-      pathChangeChance: 0.1   // changes fairly often
+      pathChangeChance: 0.1,   // changes fairly often
+      score : 1
     });
   }
 }
@@ -219,16 +227,16 @@ class FlyBug extends BaseBug {
   }
 }
 
-// Big, tanky, slow, more deliberate
+// Big, tanky, fast, more deliberate
 class RoachBug extends BaseBug {
   constructor(playArea) {
     super(playArea, {
-      hp: 12,
-      speed: 1.0,
+      hp: 30,
+      speed: 3.0,
       size: 48,
       img: "../IMG/bugs/roach.png",
-      reward: 5,
-      pathChangeChance: 0.03   // changes direction rarely
+      reward: 10,
+      pathChangeChance: 0.03
     });
   }
 

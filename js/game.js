@@ -4,6 +4,7 @@ console.log("COMMENCE DEBUGGING!");
 //  ELEMENT REFERENCES 
 // --------------------
 
+const bugMeterFill = document.getElementById("bug-meter-fill");
 const playArea = document.getElementById("play-area");
 const swatter = document.getElementById("swatter-cursor");
 
@@ -26,6 +27,11 @@ const btnRebug = document.getElementById("btn-rebug");
 const btnPauseJournal = document.getElementById("btn-pause-journal");
 const btnQuit = document.getElementById("btn-quit");
 
+const buggedScreen = document.getElementById("bugged-screen");
+const btnRebugGameOver = document.getElementById("btn-rebug-gameover");
+const btnQuitFromBugged = document.getElementById("btn-quit-from-bugged");
+
+
 const equipSwatterBtn = document.getElementById("equip-swatter");
 const equipHammerBtn = document.getElementById("equip-hammer");
 
@@ -33,10 +39,12 @@ const equipHammerBtn = document.getElementById("equip-hammer");
 //  GAME STATE
 // --------------------
 
+const BUG_METER_MAX = 100; // tune this as you like
+let bugMeterValue = 0;
+let bugScoreTotal = 0; // for future "Score" display
 let isPaused = true;       // Game starts paused!
 let gameStarted = false;   // Prevent spawns until DEBUG is pressed
 let activeBugs = [];
-let activePowerupPickups = [];
 window.activeBugs = activeBugs; // keep in sync when you modify activeBugs
 let money = 0;
 let bugsKilled = 0;
@@ -158,6 +166,95 @@ function quitGameCompletely() {
       <p>You may close this tab now.</p>
     </div>
   `;
+}
+
+// ------------------
+//  GAME OVER LOGIC 
+// ------------------
+
+function triggerBuggedGameOver() {
+  isPaused = true;
+  if (buggedScreen) {
+    buggedScreen.classList.add("active");
+  }
+}
+
+let activePowerupPickups = window.activePowerupPickups || [];
+window.powerupGeneration = window.powerupGeneration || 0;
+
+function resetGameProgress() {
+  // Invalidate existing powerups (so expires don't mess with new state)
+  window.powerupGeneration += 1;
+
+  // Clear bugs
+  activeBugs.forEach(bug => bug.die());
+  activeBugs = [];
+  window.activeBugs = activeBugs;
+
+  // Clear powerup pickups
+  activePowerupPickups.forEach(p => {
+    if (p.el && p.el.parentElement) p.el.remove();
+  });
+  activePowerupPickups = [];
+  window.activePowerupPickups = activePowerupPickups;
+
+  // Reset money / kills / score
+  money = 0;
+  bugsKilled = 0;
+  bugScoreTotal = 0;
+  updateStatsUI();
+
+  // Reset Bug Meter
+  bugMeterValue = 0;
+  refreshBugMeterUI();
+
+  // Reset weapons & multipliers
+  weaponInventory.swatter = new SwatterWeapon();
+  weaponInventory.hammer = new HammerWeapon();
+  currentWeapon = weaponInventory.swatter;
+  applyWeaponCursor();
+  if (typeof setWeaponButtonActive === "function") {
+    setWeaponButtonActive("swatter");
+  }
+
+  window.moneyMultiplier = 1;
+}
+
+// Rebug from Game Over screen
+function rebugFromBugged() {
+  if (buggedScreen) {
+    buggedScreen.classList.remove("active");
+  }
+
+  resetGameProgress();
+
+  // Start a fresh run immediately
+  isPaused = false;
+  gameStarted = true;
+  if (gameContainer) {
+    gameContainer.classList.add("active");
+  }
+  if (titleScreen) {
+    titleScreen.classList.add("background-mode");
+  }
+}
+
+if (btnRebugGameOver) {
+  btnRebugGameOver.addEventListener("click", (e) => {
+    e.stopPropagation();
+    rebugFromBugged();
+  });
+}
+
+if (btnQuitFromBugged) {
+  btnQuitFromBugged.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (buggedScreen) {
+      buggedScreen.classList.remove("active");
+    }
+    resetGameProgress();
+    quitGameCompletely(); // whatever function shows your quit screen
+  });
 }
 
 // --------------------
@@ -493,8 +590,14 @@ function handleSwat(event) {
 }
 
 // ----------------------
-//  BUG CLASS LOGIC
+//  BUG CLASS/METER LOGIC
 // ----------------------
+
+function addBugToGame(bug) {
+  activeBugs.push(bug);
+  window.activeBugs = activeBugs;
+  updateBugMeter(bug.score || 0);
+}
 
 function spawnRandomBug() {
   if (!playArea) return;
@@ -504,22 +607,44 @@ function spawnRandomBug() {
 
   if (r < 0.7) {
     bug = new AntBug(playArea);
-  } else if (r < 0.9) {
+  } else if (r < 0.95) {
     bug = new FlyBug(playArea);
   } else {
     bug = new RoachBug(playArea);
   }
 
-  activeBugs.push(bug);
+  addBugToGame(bug);
 }
 
-// Every 3 seconds, spawn a bug (if not paused and game has started)
+// Every 3 seconds (3000ms), spawn a bug (if not paused and game has started)
 setInterval(() => {
   if (gameStarted && !isPaused && gameContainer.classList.contains("active")) {
     spawnRandomBug();
   }
 }, 3000);
 
+function refreshBugMeterUI() {
+  if (!bugMeterFill) return;
+  const pct = Math.max(0, Math.min(1, bugMeterValue / BUG_METER_MAX));
+  bugMeterFill.style.width = (pct * 100) + "%";
+}
+
+function updateBugMeter(delta) {
+  bugMeterValue += delta;
+  bugMeterValue = Math.max(0, Math.min(BUG_METER_MAX, bugMeterValue));
+  refreshBugMeterUI();
+
+  if (bugMeterValue >= BUG_METER_MAX) {
+    triggerBuggedGameOver();
+  }
+}
+
+// Called from BaseBug.die() via window hook
+window.updateBugMeterFromBugDeath = function (bug) {
+  const s = bug.score || 0;
+  updateBugMeter(-s);
+  bugScoreTotal += s; // we'll display this later as Score
+};
 
 // ----------------------
 //  WEAPON CLASS LOGIC 
@@ -528,6 +653,7 @@ setInterval(() => {
 //initialize default weapon cursor on load
 applyWeaponCursor();
 setWeaponButtonActive("swatter");
+refreshBugMeterUI();
 updateStatsUI();
 
 //equip weapon functions

@@ -49,9 +49,18 @@
       </aside>
 
       <!-- Play area in the center -->
-      <div id="play-area" draggable="false">
-        <img id="swatter-cursor" src="../IMG/swatter.png" alt="Swatter">
-      </div>
+      <div id="play-area">
+  <!-- Bug Meter + Label -->
+  <div id="bug-meter-container">
+    <div id="bug-meter-label">Bug Meter</div>
+    <div id="bug-meter">
+      <div id="bug-meter-fill"></div>
+    </div>
+  </div>
+  
+  <!-- Swatter cursor -->
+  <img id="swatter-cursor" src="../IMG/swatter.png" alt="Swatter">
+  </div>
 
       <!-- Upgrades panel on the right -->
       <aside id="upgrade-panel">
@@ -122,6 +131,19 @@
         <button id="btn-rebug">REBUG</button>
         <button id="btn-pause-journal">Journal</button>
         <button id="btn-quit">Quit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bugged Game Over Screen -->
+  <div id="bugged-screen" class="overlay-panel">
+    <div class="panel-content bugged-content">
+      <h2>You've been Bugged!</h2>
+      <p>The bugs overwhelmed you...</p>
+
+      <div class="bugged-buttons">
+        <button id="btn-rebug-gameover">REBUG</button>
+        <button id="btn-quit-from-bugged">Quit</button>
       </div>
     </div>
   </div>
