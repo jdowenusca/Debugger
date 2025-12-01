@@ -9,6 +9,8 @@ const playArea = document.getElementById("play-area");
 const swatter = document.getElementById("swatter-cursor");
 
 const gameContainer = document.getElementById("game-container");
+const abilityTooltip = document.getElementById("ability-tooltip");
+const abilityButtons = document.querySelectorAll(".ability-button");
 const titleScreen = document.getElementById("title-screen");
 
 const btnDebug = document.getElementById("btn-debug");
@@ -31,13 +33,43 @@ const buggedScreen = document.getElementById("bugged-screen");
 const btnRebugGameOver = document.getElementById("btn-rebug-gameover");
 const btnQuitFromBugged = document.getElementById("btn-quit-from-bugged");
 
-
 const equipSwatterBtn = document.getElementById("equip-swatter");
 const equipHammerBtn = document.getElementById("equip-hammer");
+//more weapons here later
+const weaponPanel = document.getElementById("weapon-panel");
+const weaponTooltip = document.getElementById("weapon-tooltip");
 
 // --------------------
 //  GAME STATE
 // --------------------
+
+//ability tooltip descriptions
+const abilityInfo = {
+  "bugserk": {
+    name: "Bugserk",
+    desc: "Your current weapon is set ablaze with bug squashing fury. Enjoy double damage on your currently equipped debugging tool."
+  },
+  "bug-tape": {
+    name: "Bug Tape",
+    desc: "A downed bug is a dead bug. Spawn 3 sticky and slowing bug tape sheets in random locations across the board."
+  },
+  "bug-drone": {
+    name: "Bug Drone",
+    desc: "If you can't debug 'em, rebug em. Repurposed \"field samples\" become 4 debugging drones that keep watch over the board for a time and occasionally debug."
+  },
+  "immortal-snail": {
+    name: "Immortal Snail",
+    desc: "The eternal and ever chasing, know that the end is nigh. Time slows as its presence grows."
+  },
+  "singularity": {
+    name: "Singularity",
+    desc: "The result of dividing the universe by 0. No bug is safe from its paradoxical pull."
+  },
+  "slapshot": {
+    name: "Slapshot",
+    desc: "The penultimate debugging tool. Forked and forked well."
+  }
+};
 
 const BUG_METER_MAX = 100; // tune this as you like
 let bugMeterValue = 0;
@@ -48,6 +80,8 @@ let activeBugs = [];
 window.activeBugs = activeBugs; // keep in sync when you modify activeBugs
 let money = 0;
 let bugsKilled = 0;
+let bugSpawnIntervalMs = 3000;
+let bugSpawnTimerId = null;
 
 // Weapon inventory
 const weaponInventory = {
@@ -73,16 +107,96 @@ function upgradeHammerRadius() {
   w.hitRadius += 10;
 }
 
-// Global variables
+// Global variables for Upgrades and Powerups
 window.moneyMultiplier = 1; // used by powerups like DoubleMoneyPowerup
+const abilityCooldownBonusMs = { value: 0 }; // we'll use this later for abilities
+let gameLevel = 1;
+const upgradeConfig = {
+  "increase-atk": {
+    id: "increase-atk",
+    baseCost: 10,
+    cost: 10,
+    costMultiplier: 1.5,
+    apply() {
+      if (!currentWeapon) return;
+      currentWeapon.damage += 2;
+    }
+  },
+  "increase-rad": {
+    id: "increase-rad",
+    baseCost: 10,
+    cost: 10,
+    costMultiplier: 1.5,
+    apply() {
+      if (!currentWeapon) return;
+      currentWeapon.hitRadius += 1; // +1 px radius per level
+    }
+  },
+  "decrease-wcd": {
+    id: "decrease-wcd",
+    baseCost: 10,
+    cost: 10,
+    costMultiplier: 1.6,
+    apply() {
+      if (!currentWeapon) return;
+      // -0.25s = -250ms
+      currentWeapon.cooldownMs = Math.max(60, currentWeapon.cooldownMs - 250);
+    }
+  },
+  "decrease-acd": {
+    id: "decrease-acd",
+    baseCost: 10,
+    cost: 10,
+    costMultiplier: 1.6,
+    apply() {
+      // We'll plug this into actual abilities later
+      abilityCooldownBonusMs.value += 250; // total -0.25s per upgrade
+    }
+  },
+  "increase-money": {
+    id: "increase-money",
+    baseCost: 10,
+    cost: 10,
+    costMultiplier: 1.7,
+    apply() {
+      if (window.moneyMultiplier === undefined) {
+        window.moneyMultiplier = 1;
+      }
+      window.moneyMultiplier *= 1.10;
+    }
+  },
+  "increase-lvl": {
+    id: "increase-lvl",
+    baseCost: 10,
+    cost: 10,
+    costMultiplier: 2.0,
+    apply() {
+      // Level up: increase bug spawn rate, etc.
+      gameLevel += 1;
+      // Example: make bugs spawn faster
+      bugSpawnIntervalMs = Math.max(600, Math.round(bugSpawnIntervalMs * 0.85));
+      restartBugSpawner();
+      // Later we can unlock new weapons/tiers off gameLevel
+    }
+  }
+};
+
 
 // UI Refs
 const moneyDisplay = document.getElementById("money-display");
 const bugsKilledDisplay = document.getElementById("bugs-killed-display");
 
 function updateStatsUI() {
-  moneyDisplay.textContent = `Money: $${money}`;
-  bugsKilledDisplay.textContent = `Bugs killed: ${bugsKilled}`;
+  // keep internal money sane to 2 decimals
+  money = Math.round(money * 100) / 100;
+
+  if (moneyDisplay) {
+    moneyDisplay.textContent = `Money: $${money.toFixed(2)}`;
+  }
+
+  if (bugsKilledDisplay) {
+    bugsKilledDisplay.textContent = `Bugs killed: ${bugsKilled}`;
+  }
 }
 
 function applyWeaponCursor() {
@@ -207,6 +321,11 @@ function resetGameProgress() {
   // Reset Bug Meter
   bugMeterValue = 0;
   refreshBugMeterUI();
+
+  // Reset game level & spawn rate
+  bugSpawnIntervalMs = 3000;
+  restartBugSpawner();
+  gameLevel = 1;
 
   // Reset weapons & multipliers
   weaponInventory.swatter = new SwatterWeapon();
@@ -349,19 +468,36 @@ function activatePowerup(entry) {
 //  UPGRADE FUNCTIONS
 // --------------------
 
-// Example upgrade: +1 damage
-function upgradeSwatterDamage() {
-  currentWeapon.damage += 1;
-}
+const upgradeButtons = document.querySelectorAll(".upgrade-button");
 
-// Example upgrade: bigger swat radius
-function upgradeSwatterRadius() {
-  currentWeapon.hitRadius += 10;
-}
+upgradeButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const id = btn.dataset.upgradeId;
+    handleUpgradeClick(id, btn);
+  });
+});
 
-// Example passive upgrade: better payouts
-function upgradeMoneyMultiplier() {
-  window.moneyMultiplier *= 1.25;
+function handleUpgradeClick(id, buttonEl) {
+  const cfg = upgradeConfig[id];
+  if (!cfg) return;
+
+  if (money < cfg.cost) {
+    // Not enough money – you could flash the button or do a little shake later
+    return;
+  }
+
+  // Pay cost
+  money -= cfg.cost;
+  updateStatsUI();
+
+  // Apply the upgrade effect
+  cfg.apply();
+
+  // Increase cost for next time
+  cfg.cost = Math.round(cfg.cost * cfg.costMultiplier);
+
+  // Update button text
+  buttonEl.textContent = `Upgrade: $${cfg.cost}`;
 }
 
 // ----------------------
@@ -397,11 +533,25 @@ if (equipSwatterBtn) {
   });
 }
 
+if (equipSwatterBtn) {
+  equipSwatterBtn.addEventListener("mouseenter", () => {
+    showWeaponTooltip("swatter", equipSwatterBtn);
+  });
+  equipSwatterBtn.addEventListener("mouseleave", hideWeaponTooltip);
+}
+
 if (equipHammerBtn) {
   equipHammerBtn.addEventListener("click", () => {
     equipHammer();
     setWeaponButtonActive("hammer");
   });
+}
+
+if (equipHammerBtn) {
+  equipHammerBtn.addEventListener("mouseenter", () => {
+    showWeaponTooltip("hammer", equipHammerBtn);
+  });
+  equipHammerBtn.addEventListener("mouseleave", hideWeaponTooltip);
 }
 
 // Allow clicking outside panel to close
@@ -608,20 +758,26 @@ function spawnRandomBug() {
   if (r < 0.7) {
     bug = new AntBug(playArea);
   } else if (r < 0.95) {
-    bug = new FlyBug(playArea);
-  } else {
     bug = new RoachBug(playArea);
+  } else {
+    bug = new SpiderBug(playArea);
   }
 
   addBugToGame(bug);
 }
 
-// Every 3 seconds (3000ms), spawn a bug (if not paused and game has started)
-setInterval(() => {
+function bugSpawnLoop() {
   if (gameStarted && !isPaused && gameContainer.classList.contains("active")) {
     spawnRandomBug();
   }
-}, 3000);
+}
+
+function restartBugSpawner() {
+  if (bugSpawnTimerId) {
+    clearInterval(bugSpawnTimerId);
+  }
+  bugSpawnTimerId = setInterval(bugSpawnLoop, bugSpawnIntervalMs);
+}
 
 function refreshBugMeterUI() {
   if (!bugMeterFill) return;
@@ -655,6 +811,7 @@ applyWeaponCursor();
 setWeaponButtonActive("swatter");
 refreshBugMeterUI();
 updateStatsUI();
+restartBugSpawner();
 
 //equip weapon functions
 function equipSwatter() {
@@ -666,6 +823,102 @@ function equipHammer() {
   currentWeapon = weaponInventory.hammer;
   applyWeaponCursor();
 }
+
+//more equip functions later
+
+function showWeaponTooltip(weaponKey, anchorEl) {
+  if (!weaponTooltip || !weaponInventory[weaponKey]) return;
+
+  const weapon = weaponInventory[weaponKey];
+
+  const name = weapon.name || weaponKey;
+  const damage = weapon.damage ?? "?";
+  const radius = weapon.hitRadius ?? "?";
+  const cooldownSec = weapon.cooldownMs != null
+    ? (weapon.cooldownMs / 1000).toFixed(2) + "s"
+    : "?";
+
+  weaponTooltip.innerHTML = `
+    <div class="stat-line"><strong>Name:</strong> ${name}</div>
+    <div class="stat-line"><strong>Damage:</strong> ${damage}</div>
+    <div class="stat-line"><strong>Radius:</strong> ${radius}</div>
+    <div class="stat-line"><strong>Cooldown:</strong> ${cooldownSec}</div>
+  `;
+
+  // Show so we can measure
+  weaponTooltip.style.display = "block";
+
+  // Measure tooltip after it's visible
+  const ttRect = weaponTooltip.getBoundingClientRect();
+  const btnRect = anchorEl.getBoundingClientRect();
+  const panelRect = weaponPanel.getBoundingClientRect();
+
+  // Compute vertical position relative to panel
+  const btnCenterY = btnRect.top + btnRect.height / 2;
+  const topWithinPanel = btnCenterY - panelRect.top - ttRect.height / 2;
+
+  // Place tooltip to the LEFT of the panel, just outside it
+  const leftWithinPanel = -ttRect.width - 8; // 8px gap
+
+  weaponTooltip.style.top = `${Math.max(0, topWithinPanel)}px`;
+  weaponTooltip.style.left = `${leftWithinPanel}px`;
+}
+
+function hideWeaponTooltip() {
+  if (!weaponTooltip) return;
+  weaponTooltip.style.display = "none";
+}
+
+// ----------------------
+// ABILITY TOOLTIP LOGIC
+// ----------------------
+
+function showAbilityTooltip(abilityId, anchorEl) {
+  if (!abilityTooltip || !gameContainer) return;
+
+  const info = abilityInfo[abilityId];
+  if (!info) return;
+
+  abilityTooltip.innerHTML = `
+    <div class="ability-name">${info.name}</div>
+    <p class="ability-desc">${info.desc}</p>
+  `;
+
+  // Show so we can measure
+  abilityTooltip.style.display = "block";
+
+  const gcRect = gameContainer.getBoundingClientRect();
+  const btnRect = anchorEl.getBoundingClientRect();
+  const ttRect = abilityTooltip.getBoundingClientRect();
+
+  // Put tooltip BELOW the game container
+  const top = gcRect.bottom + 8;
+
+  // Center under the ability button
+  const buttonCenterX = btnRect.left + btnRect.width / 2;
+  let left = buttonCenterX - ttRect.width / 2;
+
+  // Clamp horizontally within viewport so we don't cause scrollbars
+  const padding = 8;
+  const maxLeft = window.innerWidth - ttRect.width - padding;
+  left = Math.max(padding, Math.min(left, maxLeft));
+
+  abilityTooltip.style.top = `${top}px`;
+  abilityTooltip.style.left = `${left}px`;
+}
+
+function hideAbilityTooltip() {
+  if (!abilityTooltip) return;
+  abilityTooltip.style.display = "none";
+}
+
+abilityButtons.forEach((btn) => {
+  const id = btn.dataset.abilityId;
+  btn.addEventListener("mouseenter", () => {
+    showAbilityTooltip(id, btn);
+  });
+  btn.addEventListener("mouseleave", hideAbilityTooltip);
+});
 
 // ---------- PLACEHOLDER: OPTIONS LOGIC LATER ----------
 // We’ll later hook music-volume & sfx-volume to actual audio.

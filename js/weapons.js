@@ -13,6 +13,7 @@ class BaseWeapon {
     cursorOffsetX = 0,
     cursorOffsetY = 0,
     cooldownMs = 250, // CD
+    description = "No description provided."
   } = {}) {
     this.name = name;
     this.damage = damage;
@@ -23,8 +24,9 @@ class BaseWeapon {
     this.cursorHeight = cursorHeight;
     this.cursorOffsetX = cursorOffsetX;
     this.cursorOffsetY = cursorOffsetY;
-
     this.cooldownMs = cooldownMs;
+    this.description = description;
+
     this.lastAttackTime = 0;
   }
 
@@ -85,7 +87,7 @@ class BaseWeapon {
 class SwatterWeapon extends BaseWeapon {
   constructor() {
     super({
-      name: "Basic Swatter",
+      name: "Bug Swatter",
       damage: 1,       
       hitRadius: 40,
       cursorSprite: "../IMG/weapons/swatter.png",
@@ -93,6 +95,7 @@ class SwatterWeapon extends BaseWeapon {
       cursorOffsetX: -30,
       cursorOffsetY: -30,
       cooldownMs: 250, // 0.25 seconds between swings
+      description: "A simple swatter for quick bug bashing."
     });
   }
 }
@@ -110,6 +113,7 @@ class HammerWeapon extends BaseWeapon {
       cursorOffsetX: -15,
       cursorOffsetY: -40,
       cooldownMs: 1000, // slower but stronger
+      description: "A heavy hammer for heavy duty debugging."
     });
   }
 }

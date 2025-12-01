@@ -196,15 +196,16 @@ class AntBug extends BaseBug {
 }
 
 // Small, weak, fast, jittery
-class FlyBug extends BaseBug {
+class RoachBug extends BaseBug {
   constructor(playArea) {
     super(playArea, {
-      hp: 3,
-      speed: 4.0,
-      size: 20,
-      img: "../IMG/bugs/fly.png",
+      hp: 8,
+      speed: 3.0,
+      size: 38,
+      img: "../IMG/bugs/roach.png",
       reward: 1,
-      pathChangeChance: 0.15   // changes direction quickly
+      pathChangeChance: 0.15,   // changes direction quickly
+      score : 2
     });
   }
   // Flies: prefer diagonals and side-to-side, very erratic
@@ -228,15 +229,16 @@ class FlyBug extends BaseBug {
 }
 
 // Big, tanky, fast, more deliberate
-class RoachBug extends BaseBug {
+class SpiderBug extends BaseBug {
   constructor(playArea) {
     super(playArea, {
       hp: 30,
-      speed: 3.0,
+      speed: 4.0,
       size: 48,
-      img: "../IMG/bugs/roach.png",
+      img: "../IMG/bugs/spider.png",
       reward: 10,
-      pathChangeChance: 0.03
+      pathChangeChance: 0.03,
+      score : 5
     });
   }
 

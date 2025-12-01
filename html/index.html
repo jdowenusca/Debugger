@@ -43,33 +43,187 @@
     <main id="game-main">
       <!-- Weapons panel on the left -->
       <aside id="weapon-panel">
-        <h2>Weapons</h2>
-        <button id="equip-swatter">Swatter</button>
-        <button id="equip-hammer">Hammer</button>
+        <h2>Debugging Tools</h2>
+        <button id="equip-swatter" class="weapon-button">
+          <img src="../img/weapons/swatter.png" alt="Swatter" class="weapon-icon">
+        </button>
+
+        <button id="equip-hammer" class="weapon-button">
+          <img src="../IMG/weapons/hammer.png" alt="Hammer" class="weapon-icon">
+        </button>
+
+        <!-- More weapon buttons can be added here -->
+
+        <!-- Weapon Stats Pop-Up -->
+        <div id="weapon-tooltip"></div>
+
       </aside>
 
       <!-- Play area in the center -->
-      <div id="play-area">
-  <!-- Bug Meter + Label -->
-  <div id="bug-meter-container">
-    <div id="bug-meter-label">Bug Meter</div>
-    <div id="bug-meter">
-      <div id="bug-meter-fill"></div>
-    </div>
-  </div>
-  
-  <!-- Swatter cursor -->
-  <img id="swatter-cursor" src="../IMG/swatter.png" alt="Swatter">
-  </div>
+      <div id="play-column">
+        <div id="play-area">
+          <!-- Bug Meter + Label -->
+          <div id="bug-meter-container">
+            <div id="bug-meter-label">Bug Meter</div>
+            <div id="bug-meter">
+              <div id="bug-meter-fill"></div>
+            </div>
+          </div>
+
+          <!-- Swatter cursor -->
+          <img id="swatter-cursor" src="../IMG/swatter.png" alt="Swatter">
+        </div>
+        <div id="ability-section">
+          <h2>Debugger Abilities</h2>
+          <div id="ability-bar">
+            <button class="ability-button" data-ability-id="bugserk">
+              <img src="../IMG/abilities/bugserk.png" alt="Bugserk" class="ability-icon">
+            </button>
+
+            <button class="ability-button" data-ability-id="bug-tape">
+              <img src="../IMG/abilities/bug_tape.png" alt="Bug Tape" class="ability-icon">
+            </button>
+
+            <button class="ability-button" data-ability-id="bug-drone">
+              <img src="../IMG/abilities/bug_drone.png" alt="Bug Drone" class="ability-icon">
+            </button>
+
+            <button class="ability-button" data-ability-id="immortal-snail">
+              <img src="../IMG/abilities/immortal_snail.png" alt="Immortal Snail" class="ability-icon">
+            </button>
+
+            <button class="ability-button" data-ability-id="singularity">
+              <img src="../IMG/abilities/singularity.png" alt="Singularity" class="ability-icon">
+            </button>
+
+            <button class="ability-button" data-ability-id="slapshot">
+              <img src="../IMG/abilities/slapshot.png" alt="Slapshot" class="ability-icon">
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Upgrades panel on the right -->
       <aside id="upgrade-panel">
-        <h2>Upgrades</h2>
-        <button id="dummy-upgrade" disabled>Coming soon...</button>
-      </aside>
-    </main>
+        <h2>Debugger Upgrades</h2>
 
+        <div id="upgrade-list">
+          <!-- 1. Increase ATK -->
+          <div class="upgrade-card" data-upgrade-id="increase-atk">
+            <div class="upgrade-top">
+              <div class="upgrade-sprite-wrapper">
+                <img src="../IMG/upgrades/increase_attack.png" alt="Increase ATK" class="upgrade-sprite">
+              </div>
+              <div class="upgrade-button-wrapper">
+              <button class="upgrade-button" data-upgrade-id="increase-atk">Upgrade: $10</button>
+              </div>
+            </div>
+            <div class="upgrade-bottom">
+              <h3>Increase ATK</h3>
+              <p class="upgrade-desc">
+                Increases the base damage of the currently held weapon by +2.
+              </p>
+            </div>
+          </div>
+
+          <!-- 2. Increase RAD -->
+          <div class="upgrade-card" data-upgrade-id="increase-rad">
+            <div class="upgrade-top">
+              <div class="upgrade-sprite-wrapper">
+                <img src="../IMG/upgrades/increase_rad.png" alt="Increase RAD" class="upgrade-sprite">
+              </div>
+              <div class="upgrade-button-wrapper">
+              <button class="upgrade-button" data-upgrade-id="increase-rad">Upgrade: $10</button>
+              </div>
+            </div>
+            <div class="upgrade-bottom">
+              <h3>Increase RAD</h3>
+              <p class="upgrade-desc">
+                Increases the radius of the currently held weapon by +1.
+              </p>
+            </div>
+          </div>
+
+          <!-- 3. Decrease WCD -->
+          <div class="upgrade-card" data-upgrade-id="decrease-wcd">
+            <div class="upgrade-top">
+              <div class="upgrade-sprite-wrapper">
+                <img src="../IMG/upgrades/decrease_wcd.png" alt="Decrease WCD" class="upgrade-sprite">
+              </div>
+              <div class="upgrade-button-wrapper">
+              <button class="upgrade-button" data-upgrade-id="decrease-wcd">Upgrade: $10</button>
+            </div>
+            </div>
+            <div class="upgrade-bottom">
+              <h3>Decrease WCD</h3>
+              <p class="upgrade-desc">
+                Decreases the cooldown between strikes of the currently held weapon by -0.25s.
+              </p>
+            </div>
+          </div>
+
+          <!-- 4. Decrease ACD -->
+          <div class="upgrade-card" data-upgrade-id="decrease-acd">
+            <div class="upgrade-top">
+              <div class="upgrade-sprite-wrapper">
+                <img src="../IMG/upgrades/decrease_acd.png" alt="Decrease ACD" class="upgrade-sprite">
+              </div>
+              <div class="upgrade-button-wrapper">
+              <button class="upgrade-button" data-upgrade-id="decrease-acd">Upgrade: $10</button>
+              </div>
+            </div>
+            <div class="upgrade-bottom">
+              <h3>Decrease ACD</h3>
+              <p class="upgrade-desc">
+                Decreases the cooldown between using abilities by -0.25s.
+              </p>
+            </div>
+          </div>
+
+          <!-- 5. Increase $$$ -->
+          <div class="upgrade-card" data-upgrade-id="increase-money">
+            <div class="upgrade-top">
+              <div class="upgrade-sprite-wrapper">
+                <img src="../IMG/upgrades/increase_money.png" alt="Increase $$$" class="upgrade-sprite">
+              </div>
+              <div class="upgrade-button-wrapper">
+              <button class="upgrade-button" data-upgrade-id="increase-money">Upgrade: $10</button>
+              </div>
+            </div>
+            <div class="upgrade-bottom">
+              <h3>Increase $$$</h3>
+              <p class="upgrade-desc">
+                Increases amount of money gained per bug killed by x1.10.
+              </p>
+            </div>
+          </div>
+
+          <!-- 6. Increase LVL -->
+          <div class="upgrade-card" data-upgrade-id="increase-lvl">
+            <div class="upgrade-top">
+              <div class="upgrade-sprite-wrapper">
+                <img src="../IMG/upgrades/increase_lvl.png" alt="Increase LVL" class="upgrade-sprite">
+              </div>
+              <div class="upgrade-button-wrapper">
+              <button class="upgrade-button" data-upgrade-id="increase-lvl">Upgrade: $10</button>
+              </div>
+            </div>
+            <div class="upgrade-bottom">
+              <h3>Increase LVL</h3>
+              <p class="upgrade-desc">
+                Increases the bugs spawn rate, unlocks the next tier of upgrades and weapons, and invites your impending
+                doom...
+              </p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </main>
   </div>
+
+  <!--Ability tooltip pop-up-->
+  <div id="ability-tooltip"></div>
 
   <!-- Journal Screen -->
   <div id="journal-screen" class="overlay-panel">
