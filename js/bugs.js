@@ -188,7 +188,7 @@ class AntBug extends BaseBug {
       speed: 2.0,
       size: 28,
       img: "../IMG/bugs/ant/antBase.png",
-      reward: 1,
+      reward: 0.50,
       pathChangeChance: 0.1,   // changes fairly often
       score : 1
     });
@@ -202,7 +202,7 @@ class RoachBug extends BaseBug {
       hp: 8,
       speed: 3.0,
       size: 38,
-      img: "../IMG/bugs/roach.png",
+      img: "../IMG/bugs/roach/roachBase.png",
       reward: 1,
       pathChangeChance: 0.15,   // changes direction quickly
       score : 2
@@ -235,7 +235,7 @@ class SpiderBug extends BaseBug {
       hp: 30,
       speed: 4.0,
       size: 48,
-      img: "../IMG/bugs/spider.png",
+      img: "../IMG/bugs/spider/spiderBase.png",
       reward: 10,
       pathChangeChance: 0.12,
       score : 5

@@ -54,8 +54,8 @@ const abilityInfo = {
     desc: "A downed bug is a dead bug. Spawn 3 sticky and slowing bug tape sheets in random locations across the board."
   },
   "bug-drone": {
-    name: "Bug Drone",
-    desc: "If you can't debug 'em, rebug em. Repurposed \"field samples\" become 4 debugging drones that keep watch over the board for a time and occasionally debug."
+    name: "Cordyceps",
+    desc: "If you can't debug 'em, rebug em. Repurposed \"field samples\" become 4 debugging hosts that keep watch over the board for a time and occasionally debug."
   },
   "immortal-snail": {
     name: "Immortal Snail",
@@ -1011,13 +1011,15 @@ function hideWeaponTooltip() {
 // ----------------------
 
 function showAbilityTooltip(abilityId, anchorEl) {
-  if (!abilityTooltip || !gameContainer) return;
+  if (!abilityTooltip) return;
 
   const info = abilityInfo[abilityId];
   if (!info) return;
 
-  const requiredLevel = abilityLevelRequirements[abilityId] || 1;
-  const locked = gameLevel < requiredLevel;
+  const requiredLevel = abilityLevelRequirements
+    ? (abilityLevelRequirements[abilityId] || 1)
+    : 1;
+  const locked = typeof gameLevel !== "undefined" && gameLevel < requiredLevel;
 
   if (locked) {
     abilityTooltip.innerHTML = `
@@ -1031,22 +1033,29 @@ function showAbilityTooltip(abilityId, anchorEl) {
     `;
   }
 
-  // existing positioning code stays the same
-  const gcRect = gameContainer.getBoundingClientRect();
+  // Show so we can measure
+  abilityTooltip.style.display = "block";
+
   const btnRect = anchorEl.getBoundingClientRect();
   const ttRect = abilityTooltip.getBoundingClientRect();
 
-  const top = gcRect.bottom + 8;
+  const padding = 8;
+
+  // 🔼 Place tooltip ABOVE the ability button
+  let top = btnRect.top - ttRect.height - padding;
+  // Clamp so it doesn't go off the top of the viewport
+  top = Math.max(padding, top);
+
+  // Center horizontally over the button
   const buttonCenterX = btnRect.left + btnRect.width / 2;
   let left = buttonCenterX - ttRect.width / 2;
 
-  const padding = 8;
+  // Clamp horizontally within viewport
   const maxLeft = window.innerWidth - ttRect.width - padding;
   left = Math.max(padding, Math.min(left, maxLeft));
 
   abilityTooltip.style.top = `${top}px`;
   abilityTooltip.style.left = `${left}px`;
-  abilityTooltip.style.display = "block";
 }
 
 function hideAbilityTooltip() {

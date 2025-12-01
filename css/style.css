@@ -38,7 +38,7 @@ body {
 }
 
 #title-logo {
-  width: 320px;
+  width: 640px;
   max-width: 80vw;
   height: auto;
   margin-bottom: 24px;
@@ -130,7 +130,8 @@ body {
 }
 
 #game-logo {
-  height: 48px;
+  height: auto;
+  width: 200px;
   opacity: 0.9;
 }
 
