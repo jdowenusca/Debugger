@@ -237,7 +237,7 @@ class SpiderBug extends BaseBug {
       size: 48,
       img: "../IMG/bugs/spider.png",
       reward: 10,
-      pathChangeChance: 0.03,
+      pathChangeChance: 0.12,
       score : 5
     });
   }

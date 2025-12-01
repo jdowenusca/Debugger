@@ -94,7 +94,7 @@ class SwatterWeapon extends BaseWeapon {
       cursorWidth: 70,
       cursorOffsetX: -30,
       cursorOffsetY: -30,
-      cooldownMs: 250, // 0.25 seconds between swings
+      cooldownMs: 500, // 0.5 seconds between swings
       description: "A simple swatter for quick bug bashing."
     });
   }

@@ -71,10 +71,21 @@ const abilityInfo = {
   }
 };
 
+// Ability LVL requirements
+const abilityLevelRequirements = {
+  "bugserk": 2,        // first ability locked until LVL 2
+  "bug-tape": 4,
+  "bug-drone": 6,
+  "immortal-snail": 10,
+  "singularity": 11,
+  "slapshot": 12,
+};
+
 const BUG_METER_MAX = 100; // tune this as you like
 let bugMeterValue = 0;
 let bugScoreTotal = 0; // for future "Score" display
-let isPaused = true;       // Game starts paused!
+var isPaused = true;       // Game starts paused!
+window.isPaused = isPaused;
 let gameStarted = false;   // Prevent spawns until DEBUG is pressed
 let activeBugs = [];
 window.activeBugs = activeBugs; // keep in sync when you modify activeBugs
@@ -82,29 +93,20 @@ let money = 0;
 let bugsKilled = 0;
 let bugSpawnIntervalMs = 3000;
 let bugSpawnTimerId = null;
+let journalOpenedFromPause = false;
 
 // Weapon inventory
 const weaponInventory = {
   swatter: new SwatterWeapon(),
-  hammer: new HammerWeapon(), // we'll define this in weapons.js
+  hammer: new HammerWeapon(),
+  // add more weapons here later
 };
-
 let currentWeapon = weaponInventory.swatter;
 
-// Upgrades (per weapon)
-function upgradeSwatterDamage() {
-  const w = weaponInventory.swatter;
-  w.damage += 1;
-}
-
-function upgradeSwatterSpeed() {
-  const w = weaponInventory.swatter;
-  w.cooldownMs = Math.max(60, w.cooldownMs - 30);
-}
-
-function upgradeHammerRadius() {
-  const w = weaponInventory.hammer;
-  w.hitRadius += 10;
+const weaponUnlockLevel = {
+  swatter: 1,
+  hammer: 3,
+  // add more weapons and their unlock levels here
 }
 
 // Global variables for Upgrades and Powerups
@@ -114,73 +116,100 @@ let gameLevel = 1;
 const upgradeConfig = {
   "increase-atk": {
     id: "increase-atk",
+    tier: 1,
+    requiredLevel: 1,
     baseCost: 10,
     cost: 10,
-    costMultiplier: 1.5,
+    costMultiplier: 2.0,
+    lastPurchaseLevel: 0, // NEW: 0 means “never bought”
     apply() {
       if (!currentWeapon) return;
-      currentWeapon.damage += 2;
+      currentWeapon.damage += 1; // +1 damage per level
     }
   },
   "increase-rad": {
     id: "increase-rad",
-    baseCost: 10,
-    cost: 10,
-    costMultiplier: 1.5,
+    tier: 1,
+    requiredLevel: 1,
+    baseCost: 20,
+    cost: 20,
+    costMultiplier: 3.0,
+    lastPurchaseLevel: 0,
     apply() {
       if (!currentWeapon) return;
-      currentWeapon.hitRadius += 1; // +1 px radius per level
+      currentWeapon.hitRadius += 5; // +5 px radius per level
     }
   },
   "decrease-wcd": {
     id: "decrease-wcd",
-    baseCost: 10,
-    cost: 10,
-    costMultiplier: 1.6,
+    tier: 1,
+    requiredLevel: 1,
+    baseCost: 30,
+    cost: 30,
+    costMultiplier: 4.0,
+    lastPurchaseLevel: 0,
     apply() {
       if (!currentWeapon) return;
-      // -0.25s = -250ms
-      currentWeapon.cooldownMs = Math.max(60, currentWeapon.cooldownMs - 250);
+      currentWeapon.cooldownMs = Math.max(60, currentWeapon.cooldownMs - 100);
     }
   },
   "decrease-acd": {
     id: "decrease-acd",
-    baseCost: 10,
-    cost: 10,
-    costMultiplier: 1.6,
+    tier: 1,
+    requiredLevel: 1,
+    baseCost: 40,
+    cost: 40,
+    costMultiplier: 4.0,
+    lastPurchaseLevel: 0,
     apply() {
-      // We'll plug this into actual abilities later
-      abilityCooldownBonusMs.value += 250; // total -0.25s per upgrade
+      abilityCooldownBonusMs.value += 100;
     }
   },
   "increase-money": {
     id: "increase-money",
-    baseCost: 10,
-    cost: 10,
-    costMultiplier: 1.7,
+    tier: 1,
+    requiredLevel: 1,
+    baseCost: 100,
+    cost: 100,
+    costMultiplier: 5.0,
+    lastPurchaseLevel: 0,
     apply() {
       if (window.moneyMultiplier === undefined) {
         window.moneyMultiplier = 1;
       }
-      window.moneyMultiplier *= 1.10;
+      window.moneyMultiplier *= 1.20;
     }
   },
   "increase-lvl": {
     id: "increase-lvl",
-    baseCost: 10,
-    cost: 10,
+    tier: 1,
+    requiredLevel: 1,
+    baseCost: 50,
+    cost: 50,
     costMultiplier: 2.0,
+    lastPurchaseLevel: 0,
     apply() {
       // Level up: increase bug spawn rate, etc.
       gameLevel += 1;
-      // Example: make bugs spawn faster
-      bugSpawnIntervalMs = Math.max(600, Math.round(bugSpawnIntervalMs * 0.85));
+      bugSpawnIntervalMs = Math.max(500, Math.round(bugSpawnIntervalMs * 0.85));
       restartBugSpawner();
-      // Later we can unlock new weapons/tiers off gameLevel
+
+      // NEW: when we level up, re-evaluate what’s unlocked
+      updateUpgradeAvailability();
+      updateWeaponAvailability();
+      updateAbilityAvailability();
     }
   }
 };
 
+// Reset all upgrades to base state (for new game)
+function resetUpgradesToBase() {
+  Object.values(upgradeConfig).forEach(cfg => {
+    if (!cfg) return;
+    cfg.cost = cfg.baseCost;
+    cfg.lastPurchaseLevel = 0;
+  });
+}
 
 // UI Refs
 const moneyDisplay = document.getElementById("money-display");
@@ -230,6 +259,7 @@ if (btnDebug && gameContainer && titleScreen) {
   btnDebug.addEventListener("click", () => {
     gameStarted = true;
     isPaused = false;
+    window.isPaused = false;
     gameContainer.classList.add("active");
     titleScreen.classList.add("background-mode");
   });
@@ -246,6 +276,10 @@ function openJournal() {
 function closeJournal() {
   if (journalScreen) {
     journalScreen.classList.remove("active");
+  }
+
+  if (journalOpenedFromPause && pauseScreen) {
+    pauseScreen.classList.add("active");
   }
 }
 
@@ -288,6 +322,7 @@ function quitGameCompletely() {
 
 function triggerBuggedGameOver() {
   isPaused = true;
+  window.isPaused = true;
   if (buggedScreen) {
     buggedScreen.classList.add("active");
   }
@@ -322,7 +357,7 @@ function resetGameProgress() {
   bugMeterValue = 0;
   refreshBugMeterUI();
 
-  // Reset game level & spawn rate
+  // Reset game level and spawn rate
   bugSpawnIntervalMs = 3000;
   restartBugSpawner();
   gameLevel = 1;
@@ -335,8 +370,13 @@ function resetGameProgress() {
   if (typeof setWeaponButtonActive === "function") {
     setWeaponButtonActive("swatter");
   }
-
   window.moneyMultiplier = 1;
+
+  // Reset upgrades/unlocks
+  resetUpgradesToBase();
+  updateAbilityAvailability();
+  updateUpgradeAvailability();
+  updateWeaponAvailability();
 }
 
 // Rebug from Game Over screen
@@ -349,6 +389,7 @@ function rebugFromBugged() {
 
   // Start a fresh run immediately
   isPaused = false;
+  window.isPaused = false;
   gameStarted = true;
   if (gameContainer) {
     gameContainer.classList.add("active");
@@ -464,9 +505,9 @@ function activatePowerup(entry) {
 }
 
 
-// --------------------
-//  UPGRADE FUNCTIONS
-// --------------------
+// -------------------------------
+//  UPDATING AVAILABILITY LOGIC
+// ------------------------------
 
 const upgradeButtons = document.querySelectorAll(".upgrade-button");
 
@@ -477,27 +518,103 @@ upgradeButtons.forEach((btn) => {
   });
 });
 
+function updateUpgradeAvailability() {
+  upgradeButtons.forEach((btn) => {
+    const id = btn.dataset.upgradeId;
+    const cfg = upgradeConfig[id];
+    if (!cfg) return;
+
+    const requiredLevel = cfg.requiredLevel || 1;
+    const alreadyBoughtThisLevel = (cfg.lastPurchaseLevel === gameLevel);
+    const lockedByLevel = gameLevel < requiredLevel;
+    const locked = lockedByLevel || alreadyBoughtThisLevel;
+
+    // Button text: always show the cost, even when red
+    btn.textContent = `Upgrade: $${cfg.cost}`;
+
+    btn.classList.toggle("locked", locked);
+
+    if (locked) {
+      if (lockedByLevel) {
+        btn.title = `Increase LVL to Unlock (requires LVL ${requiredLevel})`;
+      } else if (alreadyBoughtThisLevel) {
+        btn.title = `Increase LVL to Unlock again`;
+      }
+    } else {
+      btn.removeAttribute("title");
+    }
+  });
+}
+
+function updateWeaponAvailability() {
+  if (equipSwatterBtn) {
+    const locked = gameLevel < weaponUnlockLevel.swatter;
+    equipSwatterBtn.classList.toggle("locked", locked);
+    equipSwatterBtn.title = locked
+      ? `Increase LVL to Unlock (requires LVL ${weaponUnlockLevel.swatter})`
+      : "Bug Swatter";
+  }
+
+  if (equipHammerBtn) {
+    const locked = gameLevel < weaponUnlockLevel.hammer;
+    equipHammerBtn.classList.toggle("locked", locked);
+    equipHammerBtn.title = locked
+      ? `Increase LVL to Unlock (requires LVL ${weaponUnlockLevel.hammer})`
+      : "Bug Hammer";
+  }
+}
+
+function updateAbilityAvailability() {
+  abilityButtons.forEach((btn) => {
+    const id = btn.dataset.abilityId;
+    const requiredLevel = abilityLevelRequirements[id] || 1;
+    const locked = gameLevel < requiredLevel;
+
+    btn.classList.toggle("locked", locked);
+
+    if (locked) {
+      btn.title = `Increase LVL to Unlock (requires LVL ${requiredLevel})`;
+    } else {
+      btn.removeAttribute("title");
+    }
+  });
+}
+
 function handleUpgradeClick(id, buttonEl) {
   const cfg = upgradeConfig[id];
   if (!cfg) return;
 
-  if (money < cfg.cost) {
-    // Not enough money – you could flash the button or do a little shake later
+  const requiredLevel = cfg.requiredLevel || 1;
+  const alreadyBoughtThisLevel = (cfg.lastPurchaseLevel === gameLevel);
+
+  // Hard lock: LVL too low or already used this LVL
+  if (gameLevel < requiredLevel || alreadyBoughtThisLevel) {
+    buttonEl.classList.add("locked-pulse");
+    setTimeout(() => buttonEl.classList.remove("locked-pulse"), 150);
     return;
   }
 
-  // Pay cost
+  // Not enough money
+  if (money < cfg.cost) {
+    // optional: you can add a different pulse here later
+    return;
+  }
+
+  // Pay
   money -= cfg.cost;
   updateStatsUI();
 
-  // Apply the upgrade effect
+  // Apply effect
   cfg.apply();
 
-  // Increase cost for next time
+  // Scale cost for next time (next LVL and beyond)
   cfg.cost = Math.round(cfg.cost * cfg.costMultiplier);
 
-  // Update button text
-  buttonEl.textContent = `Upgrade: $${cfg.cost}`;
+  // Mark that we’ve used this upgrade at this LVL
+  cfg.lastPurchaseLevel = gameLevel;
+
+  // Refresh lock visuals
+  updateUpgradeAvailability();
 }
 
 // ----------------------
@@ -505,13 +622,17 @@ function handleUpgradeClick(id, buttonEl) {
 // ----------------------
 
 if (btnJournal) {
-  // Journal from the title screen
-  btnJournal.addEventListener("click", openJournal);
+  btnJournal.addEventListener("click", () => {
+    journalOpenedFromPause = false;
+    openJournal();
+  });
 }
 
 if (btnPauseJournal) {
-  // Journal from the pause menu (game stays paused)
-  btnPauseJournal.addEventListener("click", openJournal);
+  btnPauseJournal.addEventListener("click", () => {
+    journalOpenedFromPause = true;
+    openJournal();
+  });
 }
 
 if (btnOptions) {
@@ -528,9 +649,19 @@ if (closeOptionsBtn) {
 
 if (equipSwatterBtn) {
   equipSwatterBtn.addEventListener("click", () => {
+    if (gameLevel < weaponUnlockLevel.swatter) {
+      equipSwatterBtn.classList.add("locked-pulse");
+      setTimeout(() => equipSwatterBtn.classList.remove("locked-pulse"), 150);
+      return;
+    }
     equipSwatter();
     setWeaponButtonActive("swatter");
   });
+
+  equipSwatterBtn.addEventListener("mouseenter", () => {
+    showWeaponTooltip("swatter", equipSwatterBtn);
+  });
+  equipSwatterBtn.addEventListener("mouseleave", hideWeaponTooltip);
 }
 
 if (equipSwatterBtn) {
@@ -542,9 +673,19 @@ if (equipSwatterBtn) {
 
 if (equipHammerBtn) {
   equipHammerBtn.addEventListener("click", () => {
+    if (gameLevel < weaponUnlockLevel.hammer) {
+      equipHammerBtn.classList.add("locked-pulse");
+      setTimeout(() => equipHammerBtn.classList.remove("locked-pulse"), 150);
+      return;
+    }
     equipHammer();
     setWeaponButtonActive("hammer");
   });
+
+  equipHammerBtn.addEventListener("mouseenter", () => {
+    showWeaponTooltip("hammer", equipHammerBtn);
+  });
+  equipHammerBtn.addEventListener("mouseleave", hideWeaponTooltip);
 }
 
 if (equipHammerBtn) {
@@ -562,7 +703,7 @@ if (equipHammerBtn) {
       overlay.classList.remove("active");
 
       if (overlay === pauseScreen) {
-        isPaused = false;
+        window.isPaused = false;
       }
 
       if (overlay === journalScreen) {
@@ -582,11 +723,13 @@ if (equipHammerBtn) {
 
 function pauseGame() {
   isPaused = true;
+  window.isPaused = true;
   pauseScreen.classList.add("active");
 }
 
 function resumeGame() {
   isPaused = false;
+  window.isPaused = false;
   pauseScreen.classList.remove("active");
 }
 
@@ -598,6 +741,7 @@ function quitToTitle() {
 
   // Reset flags
   isPaused = true;
+  window.isPaused = true;
   gameStarted = false;
 
   // Clear bugs
@@ -806,13 +950,6 @@ window.updateBugMeterFromBugDeath = function (bug) {
 //  WEAPON CLASS LOGIC 
 // ----------------------
 
-//initialize default weapon cursor on load
-applyWeaponCursor();
-setWeaponButtonActive("swatter");
-refreshBugMeterUI();
-updateStatsUI();
-restartBugSpawner();
-
 //equip weapon functions
 function equipSwatter() {
   currentWeapon = weaponInventory.swatter;
@@ -879,32 +1016,37 @@ function showAbilityTooltip(abilityId, anchorEl) {
   const info = abilityInfo[abilityId];
   if (!info) return;
 
-  abilityTooltip.innerHTML = `
-    <div class="ability-name">${info.name}</div>
-    <p class="ability-desc">${info.desc}</p>
-  `;
+  const requiredLevel = abilityLevelRequirements[abilityId] || 1;
+  const locked = gameLevel < requiredLevel;
 
-  // Show so we can measure
-  abilityTooltip.style.display = "block";
+  if (locked) {
+    abilityTooltip.innerHTML = `
+      <div class="ability-name">${info.name}</div>
+      <p class="ability-desc">Increase LVL to Unlock (requires LVL ${requiredLevel}).</p>
+    `;
+  } else {
+    abilityTooltip.innerHTML = `
+      <div class="ability-name">${info.name}</div>
+      <p class="ability-desc">${info.desc}</p>
+    `;
+  }
 
+  // existing positioning code stays the same
   const gcRect = gameContainer.getBoundingClientRect();
   const btnRect = anchorEl.getBoundingClientRect();
   const ttRect = abilityTooltip.getBoundingClientRect();
 
-  // Put tooltip BELOW the game container
   const top = gcRect.bottom + 8;
-
-  // Center under the ability button
   const buttonCenterX = btnRect.left + btnRect.width / 2;
   let left = buttonCenterX - ttRect.width / 2;
 
-  // Clamp horizontally within viewport so we don't cause scrollbars
   const padding = 8;
   const maxLeft = window.innerWidth - ttRect.width - padding;
   left = Math.max(padding, Math.min(left, maxLeft));
 
   abilityTooltip.style.top = `${top}px`;
   abilityTooltip.style.left = `${left}px`;
+  abilityTooltip.style.display = "block";
 }
 
 function hideAbilityTooltip() {
@@ -914,11 +1056,38 @@ function hideAbilityTooltip() {
 
 abilityButtons.forEach((btn) => {
   const id = btn.dataset.abilityId;
+
   btn.addEventListener("mouseenter", () => {
     showAbilityTooltip(id, btn);
   });
+
   btn.addEventListener("mouseleave", hideAbilityTooltip);
+
+  btn.addEventListener("click", (e) => {
+    const requiredLevel = abilityLevelRequirements[id] || 1;
+    if (gameLevel < requiredLevel) {
+      btn.classList.add("locked-pulse");
+      setTimeout(() => btn.classList.remove("locked-pulse"), 150);
+      return;
+    }
+
+    // TODO: hook this into real ability logic when you're ready
+    // activateAbility(id);
+  });
 });
 
 // ---------- PLACEHOLDER: OPTIONS LOGIC LATER ----------
 // We’ll later hook music-volume & sfx-volume to actual audio.
+
+//-------------------------------------
+//     INITIALIZE ON START CALLS
+//-------------------------------------
+
+applyWeaponCursor();
+setWeaponButtonActive("swatter");
+refreshBugMeterUI();
+updateStatsUI();
+restartBugSpawner();
+updateUpgradeAvailability();
+updateWeaponAvailability();
+updateAbilityAvailability();

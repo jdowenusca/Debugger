@@ -429,6 +429,15 @@ body {
   align-items: center;
 }
 
+.weapon-button.locked {
+  border-color: #b71c1c;
+  background: #3a1515;
+}
+
+.weapon-button.locked img {
+  opacity: 0.6;
+}
+
 .weapon-button:hover {
   background: #333;
 }
@@ -480,6 +489,15 @@ body {
   align-items: center;
   justify-content: center;
   color: #f5f5f5;
+}
+
+.ability-button.locked {
+  border-color: #b71c1c;
+  background: #3a1515;
+}
+
+.ability-button.locked .ability-icon {
+  opacity: 0.5;
 }
 
 .ability-button:hover {
@@ -687,6 +705,14 @@ body {
   gap: 6px;
 }
 
+.upgrade-card.locked {
+  opacity: 0.4;
+}
+
+.upgrade-card.locked .upgrade-button {
+  cursor: not-allowed;
+}
+
 /* TOP ROW: sprite + button side by side */
 .upgrade-top {
   display: flex !important;
@@ -731,6 +757,27 @@ body {
   font-size: 0.8rem;
   font-weight: bold;
   white-space: nowrap;
+}
+
+/* Locked upgrade button state */
+.upgrade-button.locked {
+  border-color: #b71c1c;
+  background: #c62828;
+}
+
+.upgrade-button.locked:hover {
+  background: #d32f2f;
+}
+
+/* Optional little “bump” animation when you click a locked thing */
+.locked-pulse {
+  animation: lockedPulse 0.15s;
+}
+
+@keyframes lockedPulse {
+  from { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  to { transform: scale(1); }
 }
 
 .upgrade-button:hover {
