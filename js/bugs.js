@@ -295,7 +295,7 @@ class RoachBug extends BaseBug {
       deathFrame: "../IMG/bugs/roach/roachDead.png",
       animationIntervalMs: 120, // slower steps
       
-      reward: 1,
+      reward: 3,
       pathChangeChance: 0.15,
       score: 2
     });

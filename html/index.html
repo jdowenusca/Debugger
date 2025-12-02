@@ -13,13 +13,13 @@
 <body>
   <!-- Title Screen -->
   <div id="title-screen">
+    <button id="btn-about" class="about-button"> ? </button>
     <div id="title-content">
       <img id="title-logo" src="../IMG/menu/Debuggerlogo.png" alt="Debugger Logo">
 
       <div id="title-buttons">
         <button id="btn-debug">DEBUG</button>
         <!--<button id="btn-journal">Journal</button> (add back later) -->
-        <button id="btn-about">About</button>
         <button id="btn-options">Options</button>
         <button id="btn-quit-game">Quit</button>
       </div>
@@ -29,7 +29,7 @@
   <!-- Main Game Container -->
   <div id="game-container">
     <header id="game-header">
-      <button id="pause-button" title="Pause">||</button>
+      <button id="pause-button">||</button>
 
       <div id="logo-wrapper">
         <img id="game-logo" src="../IMG/menu/Debuggerlogo.png" alt="Game Logo">
@@ -46,11 +46,11 @@
       <aside id="weapon-panel">
         <h2>DeBugging Tools</h2>
         <button id="equip-swatter" class="weapon-button">
-          <img src="../IMG/weapons/swatter/swatter.png" alt="Swatter" class="weapon-icon">
+          <img src="../IMG/weapons/swatter/swatter.png" alt="" class="weapon-icon">
         </button>
 
         <button id="equip-hammer" class="weapon-button">
-          <img src="../IMG/weapons/hammer/hammer.png" alt="Hammer" class="weapon-icon">
+          <img src="../IMG/weapons/hammer/hammer.png" alt="" class="weapon-icon">
         </button>
 
         <!-- More weapon buttons can be added here -->
@@ -78,27 +78,39 @@
           <h2>DeBugger Abilities</h2>
           <div id="ability-bar">
             <button class="ability-button" data-ability-id="bugserk">
-              <img src="../IMG/abilities/bugserk.png" alt="Bugserk" class="ability-icon">
+              <img src="../IMG/abilities/bugserk.png" alt="" class="ability-icon"
+                onerror="this.src='../IMG/abilities/placeholder.png'">
+              <span class="ability-label">Bugserk</span>
             </button>
 
             <button class="ability-button" data-ability-id="bug-tape">
-              <img src="../IMG/abilities/bug_tape.png" alt="Bug Tape" class="ability-icon">
+              <img src="../IMG/abilities/bug_tape.png" alt="" class="ability-icon"
+                onerror="this.src='../IMG/abilities/placeholder.png'">
+              <span class="ability-label">Bug Tape</span>
             </button>
 
             <button class="ability-button" data-ability-id="bug-drone">
-              <img src="../IMG/abilities/bug_drone.png" alt="Bug Drone" class="ability-icon">
+              <img src="../IMG/abilities/bug_drone.png" alt="" class="ability-icon"
+                onerror="this.src='../IMG/abilities/placeholder.png'">
+              <span class="ability-label">Bug Drone</span>
             </button>
 
             <button class="ability-button" data-ability-id="immortal-snail">
-              <img src="../IMG/abilities/immortal_snail.png" alt="Immortal Snail" class="ability-icon">
+              <img src="../IMG/abilities/immortal_snail.png" alt="" class="ability-icon"
+                onerror="this.src='../IMG/abilities/placeholder.png'">
+              <span class="ability-label">Immortal Snail</span>
             </button>
 
             <button class="ability-button" data-ability-id="singularity">
-              <img src="../IMG/abilities/singularity.png" alt="Singularity" class="ability-icon">
+              <img src="../IMG/abilities/singularity.png" alt="" class="ability-icon"
+                onerror="this.src='../IMG/abilities/placeholder.png'">
+              <span class="ability-label">Singularity</span>
             </button>
 
             <button class="ability-button" data-ability-id="slapshot">
-              <img src="../IMG/abilities/slapshot.png" alt="Slapshot" class="ability-icon">
+              <img src="../IMG/abilities/slapshot.png" alt="" class="ability-icon"
+                onerror="this.src='../IMG/abilities/placeholder.png'">
+              <span class="ability-label">Slapshot</span>
             </button>
           </div>
         </div>
@@ -225,6 +237,8 @@
 
   <!--Ability tooltip pop-up-->
   <div id="ability-tooltip"></div>
+  <!--Upgrade tooltip pop-up-->
+  <div id="upgrade-tooltip"></div>
 
   <!-- Journal Screen -->
   <div id="journal-screen" class="overlay-panel">

@@ -11,6 +11,7 @@ const swatter = document.getElementById("swatter-cursor");
 const gameContainer = document.getElementById("game-container");
 const abilityTooltip = document.getElementById("ability-tooltip");
 const abilityButtons = document.querySelectorAll(".ability-button");
+const upgradeTooltip = document.getElementById("upgrade-tooltip");
 const titleScreen = document.getElementById("title-screen");
 
 const btnDebug = document.getElementById("btn-debug");
@@ -582,6 +583,15 @@ upgradeButtons.forEach((btn) => {
   });
 });
 
+upgradeButtons.forEach((btn) => {
+  // Keep click listener as-is above
+
+  btn.addEventListener("mouseenter", () => {
+    showUpgradeTooltipForButton(btn);
+  });
+  btn.addEventListener("mouseleave", hideUpgradeTooltip);
+});
+
 function updateUpgradeAvailability() {
   upgradeButtons.forEach((btn) => {
     const id = btn.dataset.upgradeId;
@@ -618,7 +628,7 @@ function updateUpgradeAvailability() {
       // 🔹 MAXED state for this weapon
       btn.classList.add("maxed");
       btn.textContent = "MAXED";
-      btn.title = "This upgrade is maxed for this weapon.";
+
       return;
     }
 
@@ -632,9 +642,9 @@ function updateUpgradeAvailability() {
     if (locked) {
       btn.classList.add("locked");
       if (lockedByLevel) {
-        btn.title = `Increase LVL to Unlock (requires LVL ${requiredLevel})`;
+
       } else if (alreadyBoughtThisLevel) {
-        btn.title = `Increase LVL to Unlock again`;
+
       }
     }
   });
@@ -1120,16 +1130,31 @@ function showWeaponTooltip(weaponKey, anchorEl) {
 
   const description = weapon.description || "";
 
-  weaponTooltip.innerHTML = `
-    <div class="stat-line"><strong>Name:</strong> ${name}</div>
-    <div class="stat-line"><strong>Damage:</strong> ${damage}</div>
-    <div class="stat-line"><strong>Radius:</strong> ${radius}</div>
-    <div class="stat-line"><strong>Cooldown:</strong> ${cooldownSec}</div>
-    ${description
-      ? `<div class="stat-line weapon-desc"><em>${description}</em></div>`
-      : ""}
-  `;
+  const requiredLevel = weaponUnlockLevel[weaponKey] || 1;
+  const unlocked = typeof gameLevel !== "undefined"
+    ? gameLevel >= requiredLevel
+    : true;
 
+  if (!unlocked) {
+    // 🔒 Locked weapon tooltip
+    weaponTooltip.innerHTML = `
+      <div class="stat-line"><strong>${name}</strong></div>
+      <div class="stat-line weapon-desc">
+        <em>Increase LVL to Unlock (requires LVL ${requiredLevel})</em>
+      </div>
+    `;
+  } else {
+    // Normal stats tooltip
+    weaponTooltip.innerHTML = `
+      <div class="stat-line"><strong>Name:</strong> ${name}</div>
+      <div class="stat-line"><strong>Damage:</strong> ${damage}</div>
+      <div class="stat-line"><strong>Radius:</strong> ${radius}</div>
+      <div class="stat-line"><strong>Cooldown:</strong> ${cooldownSec}</div>
+      ${description
+        ? `<div class="stat-line weapon-desc"><em>${description}</em></div>`
+        : ""}
+    `;
+  }
   // Show so we can measure
   weaponTooltip.style.display = "block";
 
@@ -1233,6 +1258,61 @@ abilityButtons.forEach((btn) => {
   });
 });
 
+//-------------------------------------
+//        UPGRADE TOOLTIP LOGIC
+//-------------------------------------
+
+function showUpgradeTooltipForButton(buttonEl) {
+  if (!upgradeTooltip) return;
+
+  // Only show tooltip for RED (locked) buttons
+  if (!buttonEl.classList.contains("locked")) {
+    hideUpgradeTooltip();
+    return;
+  }
+
+  upgradeTooltip.innerHTML = `
+    <p class="upgrade-desc">Increase LVL to Unlock again.</p>
+  `;
+
+  // Show so we can position
+  upgradeTooltip.style.display = "block";
+
+  const btnRect = buttonEl.getBoundingClientRect();
+  const ttRect = upgradeTooltip.getBoundingClientRect();
+  const padding = 8;
+
+  // Place tooltip ABOVE the button
+  let top = btnRect.top - ttRect.height - padding;
+  top = Math.max(padding, top);
+
+  const buttonCenterX = btnRect.left + btnRect.width / 2;
+  let left = buttonCenterX - ttRect.width / 2;
+
+  const maxLeft = window.innerWidth - ttRect.width - padding;
+  left = Math.max(padding, Math.min(left, maxLeft));
+
+  upgradeTooltip.style.top = `${top}px`;
+  upgradeTooltip.style.left = `${left}px`;
+}
+
+function hideUpgradeTooltip() {
+  if (!upgradeTooltip) return;
+  upgradeTooltip.style.display = "none";
+}
+
+//------------------------------
+//    STRIP NATIVE TOOLTIPS
+//------------------------------
+
+function stripNativeTooltips() {
+  // Remove all title attributes inside the game so only custom tooltips show
+  const els = document.querySelectorAll(
+    "#game-container [title], #title-screen [title]"
+  );
+  els.forEach(el => el.removeAttribute("title"));
+}
+
 // ---------- PLACEHOLDER: OPTIONS LOGIC LATER ----------
 // We’ll later hook music-volume & sfx-volume to actual audio.
 
@@ -1250,3 +1330,5 @@ initPerWeaponUpgradeState();
 updateUpgradeAvailability();
 updateWeaponAvailability();
 updateAbilityAvailability();
+
+stripNativeTooltips();
