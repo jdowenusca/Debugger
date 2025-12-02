@@ -34,15 +34,25 @@ function pickWeightedDirectionIndex(weights) {
 // --------------------------------------
 
 class BaseBug {
-  constructor(playArea, {
-    hp = 10,              // Health Points (HP)
-    speed = 1.0,          // Speed (SP)
-    size = 40,            // Size (SZ)
-    img = "../IMG/bugs/default.png",
-    reward = 1,           // Money gained on kill
-    pathChangeChance = 0.02, // Chance each tick to pick a new path
-    score = 1
-  } = {}) {
+  constructor(playArea, options = {}) {
+    const {
+      hp = 10,              // Health Points (HP)
+      speed = 1.0,          // Speed (SP)
+      size = 40,            // logical size / scale
+      spriteWidth,          // visual width (optional)
+      spriteHeight,         // visual height (optional)
+
+      // NEW: animation frames
+      walkFrames = [],      // array of image paths used while alive
+      deathFrame = null,    // image path for squish frame
+
+      img = "../IMG/bugs/default.png", // fallback if no walkFrames
+      reward = 1,
+      pathChangeChance = 0.02,
+      score = 1,
+
+      animationIntervalMs = 140 // how fast frames switch
+    } = options;
 
     this.playArea = playArea;
 
@@ -51,30 +61,46 @@ class BaseBug {
     this.hp = hp;
     this.speed = speed;
     this.size = size;
+
+    // Visual dimensions
+    this.spriteWidth = (typeof spriteWidth === "number") ? spriteWidth : size;
+    this.spriteHeight = (typeof spriteHeight === "number") ? spriteHeight : size;
+
     this.reward = reward;
     this.pathChangeChance = pathChangeChance;
     this.score = score;
 
-    // State
+    // Animation setup
+    // If no walk frames provided, fall back to single img
+    this.walkFrames = (walkFrames && walkFrames.length > 0) ? walkFrames : [img];
+    this.deathFrame = deathFrame || this.walkFrames[this.walkFrames.length - 1];
+    this.animationIntervalMs = animationIntervalMs;
+    this.currentFrameIndex = 0;
+    this._lastFrameSwitchTime = performance.now();
+
     this.isDead = false;
 
     // Direction vector
     this.dirX = 0;
     this.dirY = 0;
-    this.angleDeg = 0; // For sprite facing
+    this.angleDeg = 0;
 
     // Create the DOM element
     this.el = document.createElement("img");
-    this.el.src = img;
     this.el.classList.add("bug");
-    this.el.style.width = `${size}px`;
-    this.el.style.height = `${size}px`;
+
+    // Start on first walk frame
+    this.el.src = this.walkFrames[0];
+
+    // Use visual dimensions
+    this.el.style.width = `${this.spriteWidth}px`;
+    this.el.style.height = `${this.spriteHeight}px`;
 
     // Random spawn location
-    this.x = Math.random() * (playArea.clientWidth - size);
-    this.y = Math.random() * (playArea.clientHeight - size);
+    this.x = Math.random() * (playArea.clientWidth - this.spriteWidth);
+    this.y = Math.random() * (playArea.clientHeight - this.spriteHeight);
 
-    // Choose initial path
+    // Initial direction + position
     this.choosePath();
     this.updatePosition();
 
@@ -83,7 +109,6 @@ class BaseBug {
 
     // Movement handler
     this.moveInterval = setInterval(() => {
-      // Note: game.js sets isPaused; we read via window.isPaused
       if (!window.isPaused) {
         this.move();
       }
@@ -95,7 +120,7 @@ class BaseBug {
     this.dirY = dy;
 
     const angleRad = Math.atan2(dy, dx);
-    this.angleDeg = angleRad * 180 / Math.PI + 90; // adjust if your sprite faces a different "base" direction
+    this.angleDeg = angleRad * 180 / Math.PI + 90;
   }
 
   // choosePath: pick one of 8 directions
@@ -107,8 +132,8 @@ class BaseBug {
 
   // Core movement step
   move() {
-    const maxX = this.playArea.clientWidth - this.size;
-    const maxY = this.playArea.clientHeight - this.size;
+    const maxX = this.playArea.clientWidth - this.spriteWidth;
+    const maxY = this.playArea.clientHeight - this.spriteHeight;
 
     this.x += this.dirX * this.speed;
     this.y += this.dirY * this.speed;
@@ -138,6 +163,7 @@ class BaseBug {
     }
 
     this.updatePosition();
+    this.updateAnimation();
   }
 
   updatePosition() {
@@ -146,15 +172,28 @@ class BaseBug {
     this.el.style.transform = `rotate(${this.angleDeg}deg)`;
   }
 
+  // Simple walk-cycle animation
+  updateAnimation() {
+    if (this.isDead) return;
+    if (!this.walkFrames || this.walkFrames.length <= 1) return;
+
+    const now = performance.now();
+    if (now - this._lastFrameSwitchTime >= this.animationIntervalMs) {
+      this._lastFrameSwitchTime = now;
+      this.currentFrameIndex = (this.currentFrameIndex + 1) % this.walkFrames.length;
+      this.el.src = this.walkFrames[this.currentFrameIndex];
+    }
+  }
+
   // Center point (for hit detection)
   getCenter() {
     return {
-      cx: this.x + this.size / 2,
-      cy: this.y + this.size / 2
+      cx: this.x + this.spriteWidth / 2,
+      cy: this.y + this.spriteHeight / 2
     };
   }
 
-  // Taking damage
+  // Damage
   takeDamage(dmg = 1) {
     if (this.isDead) return;
     this.hp -= dmg;
@@ -163,11 +202,43 @@ class BaseBug {
     }
   }
 
+  // Spawn a squish sprite at the bug's position
+  spawnDeathSprite(cx, cy) {
+    if (!this.playArea) return;
+    const splat = document.createElement("img");
+    splat.src = this.deathFrame || this.el.src;
+    splat.classList.add("bug-death");
+
+    const w = this.spriteWidth;
+    const h = this.spriteHeight;
+
+    splat.style.width = `${w}px`;
+    splat.style.height = `${h}px`;
+    splat.style.left = (cx - w / 2) + "px";
+    splat.style.top = (cy - h / 2) + "px";
+
+    this.playArea.appendChild(splat);
+
+    // Fade out a moment later
+    requestAnimationFrame(() => {
+      splat.style.opacity = "0";
+      splat.style.transform = "scale(0.9)";
+    });
+
+    setTimeout(() => {
+      splat.remove();
+    }, 1500); // 1.5 seconds
+  }
+
   // Removing bug
   die() {
     if (this.isDead) return;
     this.isDead = true;
     clearInterval(this.moveInterval);
+
+    const { cx, cy } = this.getCenter();
+    this.spawnDeathSprite(cx, cy);
+
     this.el.remove();
 
     if (typeof window.updateBugMeterFromBugDeath === "function") {
@@ -187,10 +258,20 @@ class AntBug extends BaseBug {
       hp: 3,
       speed: 2.0,
       size: 28,
-      img: "../IMG/bugs/ant/antBase.png",
-      reward: 0.50,
-      pathChangeChance: 0.1,   // changes fairly often
-      score : 1
+      spriteWidth: 20,
+      spriteHeight: 20,
+
+      walkFrames: [
+        "../IMG/bugs/ant/antLeft.png",
+        "../IMG/bugs/ant/antBase.png",
+        "../IMG/bugs/ant/antRight.png"
+      ],
+      deathFrame: "../IMG/bugs/ant/antDead.png",
+      animationIntervalMs: 100, // average speed
+
+      reward: 0.5,
+      pathChangeChance: 0.1,
+      score: 1
     });
   }
 }
@@ -202,13 +283,25 @@ class RoachBug extends BaseBug {
       hp: 8,
       speed: 3.0,
       size: 38,
+      spriteWidth: 26,
+      spriteHeight: 42,
       img: "../IMG/bugs/roach/roachBase.png",
+      
+      walkFrames: [
+        "../IMG/bugs/roach/roachLeft.png",
+        "../IMG/bugs/roach/roachBase.png",
+        "../IMG/bugs/roach/roachRight.png"
+      ],
+      deathFrame: "../IMG/bugs/roach/roachDead.png",
+      animationIntervalMs: 120, // slower steps
+      
       reward: 1,
-      pathChangeChance: 0.15,   // changes direction quickly
-      score : 2
+      pathChangeChance: 0.15,
+      score: 2
     });
   }
-  // Flies: prefer diagonals and side-to-side, very erratic
+
+  // Roaches: tend to dart around with side-to-side bias
   choosePath() {
     // Weights: [N, NE, E, SE, S, SW, W, NW]
     const weights = [
@@ -235,25 +328,36 @@ class SpiderBug extends BaseBug {
       hp: 30,
       speed: 4.0,
       size: 48,
+      spriteWidth: 48,
+      spriteHeight: 64,
       img: "../IMG/bugs/spider/spiderBase.png",
+      
+      walkFrames: [
+        "../IMG/bugs/spider/spiderLeft.png",
+        "../IMG/bugs/spider/spiderBase.png",
+        "../IMG/bugs/spider/spiderRight.png"
+      ],
+      deathFrame: "../IMG/bugs/spider/spiderDead.png",
+      animationIntervalMs: 60, // fast, jittery steps
+      
       reward: 10,
       pathChangeChance: 0.12,
-      score : 5
+      score: 5
     });
   }
 
-  // Roaches: tend to move downward and along the edges
+  // Spiders: tend to move downward and along the edges
   choosePath() {
-    // Weights: [N, NE, E, SE, S, SW, W, NW]
+    // Weights: [N, NE, E, ESE, S, SW, W, NW]
     const weights = [
       1,  // N
-      2,  // NE
+      4,  // NE
       2,  // E
       4,  // SE
-      5,  // S
+      1,  // S
       4,  // SW
       2,  // W
-      2   // NW
+      4   // NW
     ];
 
     const idx = pickWeightedDirectionIndex(weights);
@@ -263,4 +367,4 @@ class SpiderBug extends BaseBug {
 }
 
 // You can keep adding more bug types later:
-// class WaspBug extends BaseBug { ... with its own pathChangeChance or overridden choosePath() }
+// class WaspBug extends BaseBug { ... }

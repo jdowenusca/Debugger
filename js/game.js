@@ -16,11 +16,14 @@ const titleScreen = document.getElementById("title-screen");
 const btnDebug = document.getElementById("btn-debug");
 const btnJournal = document.getElementById("btn-journal");
 const btnOptions = document.getElementById("btn-options");
+const btnAbout = document.getElementById("btn-about");
 
 const journalScreen = document.getElementById("journal-screen");
 const optionsScreen = document.getElementById("options-screen");
+const aboutScreen = document.getElementById("about-screen");
 const closeJournalBtn = document.getElementById("close-journal");
 const closeOptionsBtn = document.getElementById("close-options");
+const closeAboutBtn = document.getElementById("close-about");
 const quitGameBtn = document.getElementById("btn-quit-game");
 
 const pauseScreen = document.getElementById("pause-screen");
@@ -47,7 +50,7 @@ const weaponTooltip = document.getElementById("weapon-tooltip");
 const abilityInfo = {
   "bugserk": {
     name: "Bugserk",
-    desc: "Your current weapon is set ablaze with bug squashing fury. Enjoy double damage on your currently equipped debugging tool."
+    desc: "Your current weapon is set ablaze with bug squashing fury. Enjoy double damage on your currently equipped DeBugging tool."
   },
   "bug-tape": {
     name: "Bug Tape",
@@ -55,7 +58,7 @@ const abilityInfo = {
   },
   "bug-drone": {
     name: "Cordyceps",
-    desc: "If you can't debug 'em, rebug em. Repurposed \"field samples\" become 4 debugging hosts that keep watch over the board for a time and occasionally debug."
+    desc: "If you can't DeBug 'em, rebug em. Repurposed \"field samples\" become 4 DeBugging hosts that keep watch over the board for a time and occasionally DeBug."
   },
   "immortal-snail": {
     name: "Immortal Snail",
@@ -67,7 +70,7 @@ const abilityInfo = {
   },
   "slapshot": {
     name: "Slapshot",
-    desc: "The penultimate debugging tool. Forked and forked well."
+    desc: "The penultimate DeBugging tool. Forked and forked well."
   }
 };
 
@@ -102,6 +105,7 @@ const weaponInventory = {
   // add more weapons here later
 };
 let currentWeapon = weaponInventory.swatter;
+let currentWeaponKey = "swatter";
 
 const weaponUnlockLevel = {
   swatter: 1,
@@ -113,6 +117,12 @@ const weaponUnlockLevel = {
 window.moneyMultiplier = 1; // used by powerups like DoubleMoneyPowerup
 const abilityCooldownBonusMs = { value: 0 }; // we'll use this later for abilities
 let gameLevel = 1;
+const weaponSpecificUpgradeIds = ["increase-atk", "increase-rad", "decrease-wcd"];
+
+function isWeaponSpecificUpgrade(id) {
+  return weaponSpecificUpgradeIds.includes(id);
+}
+
 const upgradeConfig = {
   "increase-atk": {
     id: "increase-atk",
@@ -202,13 +212,53 @@ const upgradeConfig = {
   }
 };
 
+// Per-weapon upgrade state (cost + lastPurchaseLevel) for weapon-specific upgrades
+let perWeaponUpgradeState = {};
+
+function initPerWeaponUpgradeState() {
+  perWeaponUpgradeState = {};
+
+  const weaponKeys = Object.keys(weaponInventory);
+  weaponKeys.forEach((weaponKey) => {
+    perWeaponUpgradeState[weaponKey] = {};
+
+    weaponSpecificUpgradeIds.forEach((upgradeId) => {
+      const cfg = upgradeConfig[upgradeId];
+
+      // Default base cost from config
+      let baseCost = cfg.baseCost;
+
+      // Hammer upgrades starting values
+      if (weaponKey === "hammer" && upgradeId === "increase-atk") {
+        baseCost = 30;
+      }
+      if (weaponKey === "hammer" && upgradeId === "increase-rad") {
+        baseCost = 40;
+      }
+      if (weaponKey === "hammer" && upgradeId === "decrease-wcd") {
+        baseCost = 50;
+      }
+
+      perWeaponUpgradeState[weaponKey][upgradeId] = {
+        cost: baseCost,
+        lastPurchaseLevel: 0,
+        timesPurchased: 0  // NEW: track how many times this weapon bought this upgrade
+      };
+    });
+  });
+}
+
 // Reset all upgrades to base state (for new game)
 function resetUpgradesToBase() {
+  // Reset global upgrade config
   Object.values(upgradeConfig).forEach(cfg => {
     if (!cfg) return;
     cfg.cost = cfg.baseCost;
     cfg.lastPurchaseLevel = 0;
   });
+
+  // Reset per-weapon state too
+  initPerWeaponUpgradeState();
 }
 
 // UI Refs
@@ -259,11 +309,12 @@ if (btnDebug && gameContainer && titleScreen) {
   btnDebug.addEventListener("click", () => {
     gameStarted = true;
     isPaused = false;
-    window.isPaused = false;
     gameContainer.classList.add("active");
     titleScreen.classList.add("background-mode");
-  });
 
+    // 🔹 Blur the global background
+    document.body.classList.add("game-active");
+  });
 }
 
 // Show / hide Journal
@@ -296,6 +347,19 @@ function closeOptions() {
   }
 }
 
+// Show / hide About Us
+function openAbout() {
+  if (aboutScreen) {
+    aboutScreen.classList.add("active");
+  }
+}
+
+function closeAbout() {
+  if (aboutScreen) {
+    aboutScreen.classList.remove("active");
+  }
+}
+
 if (quitGameBtn) {
   quitGameBtn.addEventListener("click", () => {
     quitGameCompletely();
@@ -310,7 +374,7 @@ function quitGameCompletely() {
   // If that fails, fallback
   document.body.innerHTML = `
     <div style="text-align:center; padding-top:50px; color:white; font-size:24px;">
-      <p>Thank you for playing Debugger!</p>
+      <p>Thank you for playing DeBugger!</p>
       <p>You may close this tab now.</p>
     </div>
   `;
@@ -525,23 +589,53 @@ function updateUpgradeAvailability() {
     if (!cfg) return;
 
     const requiredLevel = cfg.requiredLevel || 1;
-    const alreadyBoughtThisLevel = (cfg.lastPurchaseLevel === gameLevel);
+
+    let cost;
+    let lastPurchaseLevel;
+    let timesPurchased = 0;
+    let isMaxed = false;
+
+    if (isWeaponSpecificUpgrade(id)) {
+      const weaponKey = currentWeaponKey;
+      const state = perWeaponUpgradeState[weaponKey]?.[id];
+      if (!state) return;
+
+      cost = state.cost;
+      lastPurchaseLevel = state.lastPurchaseLevel;
+      timesPurchased = state.timesPurchased || 0;
+      isMaxed = timesPurchased >= 5;
+    } else {
+      cost = cfg.cost;
+      lastPurchaseLevel = cfg.lastPurchaseLevel;
+      // Global upgrades are not capped right now
+    }
+
+    // Clear possible state classes first
+    btn.classList.remove("locked", "maxed");
+    btn.removeAttribute("title");
+
+    if (isWeaponSpecificUpgrade(id) && isMaxed) {
+      // 🔹 MAXED state for this weapon
+      btn.classList.add("maxed");
+      btn.textContent = "MAXED";
+      btn.title = "This upgrade is maxed for this weapon.";
+      return;
+    }
+
     const lockedByLevel = gameLevel < requiredLevel;
+    const alreadyBoughtThisLevel = (lastPurchaseLevel === gameLevel);
     const locked = lockedByLevel || alreadyBoughtThisLevel;
 
-    // Button text: always show the cost, even when red
-    btn.textContent = `Upgrade: $${cfg.cost}`;
-
-    btn.classList.toggle("locked", locked);
+    // Normal path: show cost text
+    btn.textContent = `Upgrade: $${cost}`;
 
     if (locked) {
+      btn.classList.add("locked");
       if (lockedByLevel) {
         btn.title = `Increase LVL to Unlock (requires LVL ${requiredLevel})`;
       } else if (alreadyBoughtThisLevel) {
         btn.title = `Increase LVL to Unlock again`;
       }
-    } else {
-      btn.removeAttribute("title");
     }
   });
 }
@@ -585,9 +679,37 @@ function handleUpgradeClick(id, buttonEl) {
   if (!cfg) return;
 
   const requiredLevel = cfg.requiredLevel || 1;
-  const alreadyBoughtThisLevel = (cfg.lastPurchaseLevel === gameLevel);
 
-  // Hard lock: LVL too low or already used this LVL
+  let cost;
+  let lastPurchaseLevel;
+  let stateRef = null;
+  let timesPurchased = 0;
+  let isMaxed = false;
+
+  if (isWeaponSpecificUpgrade(id)) {
+    const weaponKey = currentWeaponKey;
+    const state = perWeaponUpgradeState[weaponKey]?.[id];
+    if (!state) return;
+
+    stateRef = state;
+    cost = state.cost;
+    lastPurchaseLevel = state.lastPurchaseLevel;
+    timesPurchased = state.timesPurchased || 0;
+    isMaxed = timesPurchased >= 5;
+  } else {
+    cost = cfg.cost;
+    lastPurchaseLevel = cfg.lastPurchaseLevel;
+  }
+
+  const alreadyBoughtThisLevel = (lastPurchaseLevel === gameLevel);
+
+  // 🔹 Hard lock conditions
+  if (isWeaponSpecificUpgrade(id) && isMaxed) {
+    buttonEl.classList.add("locked-pulse");
+    setTimeout(() => buttonEl.classList.remove("locked-pulse"), 150);
+    return;
+  }
+
   if (gameLevel < requiredLevel || alreadyBoughtThisLevel) {
     buttonEl.classList.add("locked-pulse");
     setTimeout(() => buttonEl.classList.remove("locked-pulse"), 150);
@@ -595,25 +717,31 @@ function handleUpgradeClick(id, buttonEl) {
   }
 
   // Not enough money
-  if (money < cfg.cost) {
-    // optional: you can add a different pulse here later
+  if (money < cost) {
+    // (optional) add a different pulse for insufficient funds
     return;
   }
 
   // Pay
-  money -= cfg.cost;
+  money -= cost;
   updateStatsUI();
 
-  // Apply effect
+  // Apply the upgrade effect (acts on currentWeapon)
   cfg.apply();
 
-  // Scale cost for next time (next LVL and beyond)
-  cfg.cost = Math.round(cfg.cost * cfg.costMultiplier);
+  // Scale cost for next purchase path
+  const newCost = Math.round(cost * cfg.costMultiplier);
 
-  // Mark that we’ve used this upgrade at this LVL
-  cfg.lastPurchaseLevel = gameLevel;
+  if (isWeaponSpecificUpgrade(id)) {
+    stateRef.cost = newCost;
+    stateRef.lastPurchaseLevel = gameLevel;
+    stateRef.timesPurchased = (stateRef.timesPurchased || 0) + 1;
+  } else {
+    cfg.cost = newCost;
+    cfg.lastPurchaseLevel = gameLevel;
+  }
 
-  // Refresh lock visuals
+  // Refresh UI state (may now show MAXED)
   updateUpgradeAvailability();
 }
 
@@ -639,12 +767,20 @@ if (btnOptions) {
   btnOptions.addEventListener("click", openOptions);
 }
 
+if (btnAbout) {
+  btnAbout.addEventListener("click", openAbout);
+}
+
 if (closeJournalBtn) {
   closeJournalBtn.addEventListener("click", closeJournal);
 }
 
 if (closeOptionsBtn) {
   closeOptionsBtn.addEventListener("click", closeOptions);
+}
+
+if (closeAboutBtn) {
+  closeAboutBtn.addEventListener("click", closeAbout);
 }
 
 if (equipSwatterBtn) {
@@ -763,6 +899,9 @@ function quitToTitle() {
   if (titleScreen) {
     titleScreen.classList.remove("background-mode");
   }
+
+  // 🔹 Unblur the global background
+  document.body.classList.remove("game-active");
 }
 
 //--------------------------------
@@ -953,12 +1092,16 @@ window.updateBugMeterFromBugDeath = function (bug) {
 //equip weapon functions
 function equipSwatter() {
   currentWeapon = weaponInventory.swatter;
+  currentWeaponKey = "swatter";
   applyWeaponCursor();
+  updateUpgradeAvailability();
 }
 
 function equipHammer() {
   currentWeapon = weaponInventory.hammer;
+  currentWeaponKey = "hammer";
   applyWeaponCursor();
+  updateUpgradeAvailability();
 }
 
 //more equip functions later
@@ -975,11 +1118,16 @@ function showWeaponTooltip(weaponKey, anchorEl) {
     ? (weapon.cooldownMs / 1000).toFixed(2) + "s"
     : "?";
 
+  const description = weapon.description || "";
+
   weaponTooltip.innerHTML = `
     <div class="stat-line"><strong>Name:</strong> ${name}</div>
     <div class="stat-line"><strong>Damage:</strong> ${damage}</div>
     <div class="stat-line"><strong>Radius:</strong> ${radius}</div>
     <div class="stat-line"><strong>Cooldown:</strong> ${cooldownSec}</div>
+    ${description
+      ? `<div class="stat-line weapon-desc"><em>${description}</em></div>`
+      : ""}
   `;
 
   // Show so we can measure
@@ -1097,6 +1245,8 @@ setWeaponButtonActive("swatter");
 refreshBugMeterUI();
 updateStatsUI();
 restartBugSpawner();
+
+initPerWeaponUpgradeState();
 updateUpgradeAvailability();
 updateWeaponAvailability();
 updateAbilityAvailability();

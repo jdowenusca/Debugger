@@ -6,7 +6,7 @@
 }
 
 body {
-  background: #111;
+  background: #050507 url("../IMG/menu/Background.png") center center / cover no-repeat fixed;
   color: #f5f5f5;
   display: flex;
   justify-content: center;
@@ -15,12 +15,25 @@ body {
   position: relative;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("../IMG/menu/Background.png") center center / cover no-repeat fixed;
+  z-index: -1;
+  transition: filter 0.5s ease;
+}
+
+body.game-active::before {
+  filter: blur(6px);
+}
+
 /* ---------- TITLE SCREEN ---------- */
 
 #title-screen {
   position: fixed;
   inset: 0;
-  background: #050507;
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -29,12 +42,19 @@ body {
 }
 
 #title-screen.background-mode {
+  background: transparent;
   opacity: 0;
   pointer-events: none; /* ignore mouse after game starts */
 }
 
+#title-screen.background-mode #title-content {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
 #title-content {
   text-align: center;
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 #title-logo {
@@ -88,11 +108,19 @@ body {
   display: none;          /* hidden by default */
   pointer-events: none;   /* doesn't block clicks */
   max-width: 200px;
-  white-space: nowrap;
+  white-space: normal;
+  word-wrap: break-word;
 }
 
 #weapon-tooltip .stat-line {
   margin: 2px 0;
+}
+
+#weapon-tooltip .weapon-desc {
+  margin-top: 6px;
+  font-style: italic;
+  color: #cccccc;
+  line-height: 1.2;
 }
 
 #game-container {
@@ -188,8 +216,8 @@ body {
 /* Label text above bar */
 #bug-meter-label {
   font-size: 13px;
-  color: #e0e0e0;
-  text-shadow: 0 0 3px #000;
+  color: #4f0101;
+  text-shadow: 1px 1px 12px #000;
   margin-top: 4px;
   margin-bottom: 2px;
   pointer-events: none;
@@ -252,16 +280,9 @@ body {
   border-radius: 4px;
   overflow: hidden;
 
-  /* Faint grid */
-  background-color: #ff5d57;
-  background-image:
-    linear-gradient(#333 1px, transparent 1px),
-    linear-gradient(90deg, #333 1px, transparent 1px);
-  background-size: 32px 32px;
-  background-position: 0 0;
+  /* New background image */
+  background: #000 url("../IMG/menu/Background.png") center center / cover no-repeat;
 
-  /* Hide system cursor when inside play area */
-  /*cursor: none;*/
   -webkit-user-drag: none;
   user-select: none;
 }
@@ -579,6 +600,8 @@ body {
   margin-bottom: 4px;
 }
 
+
+
 .close-btn {
   margin-top: 16px;
   padding: 8px 16px;
@@ -637,6 +660,84 @@ body {
   margin-top: 14px;
   font-size: 0.9rem;
   color: #bbb;
+}
+
+/* ---------- ABOUT US SCREEN ---------- */
+
+#about-screen {
+  z-index: 30; /* same layer as Journal/Options */
+}
+
+#about-screen .panel-content {
+  background: #181818;
+  border-radius: 8px;
+  border: 1px solid #555;
+  padding: 24px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: fadeInPanel 0.3s ease;
+}
+
+#about-screen h2 {
+  margin-bottom: 16px;
+  font-size: 1.6rem;
+  text-align: center;
+  color: #f0f0f0;
+}
+
+#about-screen p {
+  margin-bottom: 10px;
+  color: #e5e5e5;
+  line-height: 1.4;
+}
+
+#about-screen ul {
+  margin: 12px 0 18px;
+  padding-left: 20px;
+}
+
+#about-screen li {
+  margin-bottom: 6px;
+  color: #d5d5d5;
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+/* Highlight developer names slightly */
+#about-screen li strong,
+#about-screen ul li span {
+  color: #7fffb1; /* soft aqua highlight */
+  font-weight: bold;
+}
+
+/* Close button matches others */
+#close-about {
+  margin-top: 18px;
+  padding: 8px 16px;
+  background: #333;
+  color: #f5f5f5;
+  border: 1px solid #666;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#close-about:hover {
+  background: #444;
+}
+
+#about-screen .panel-content hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    #88ff39,
+    transparent
+  );
+  margin: 20px 0;
 }
 
 /* Make pause below, journal/options above */
@@ -699,6 +800,16 @@ body {
   transform-origin: center center; /* rotate around center */
 }
 
+.bug-death {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  opacity: 1;
+  transform-origin: center center;
+  transition: opacity 2.0s ease, transform 2.0s ease;
+  z-index: 6; /* slightly above normal bugs */
+}
+
 /* Hard override: upgrade cards are vertical flex, not grid */
 .upgrade-card {
   display: flex !important;
@@ -758,6 +869,18 @@ body {
   font-size: 0.8rem;
   font-weight: bold;
   white-space: nowrap;
+}
+
+/* Gold "MAXED" state for weapon-specific upgrades */
+.upgrade-button.maxed {
+  border-color: #d4af37;
+  background: #b8860b;
+  color: #fff8dc;
+  cursor: default;
+}
+
+.upgrade-button.maxed:hover {
+  background: #c1911a;
 }
 
 /* Locked upgrade button state */

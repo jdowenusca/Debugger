@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Debugger - Bug Swatter Idle Game</title>
+  <title>DeBugger - Bug Swatter Idle Game</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Link to CSS styles -->
@@ -18,7 +18,8 @@
 
       <div id="title-buttons">
         <button id="btn-debug">DEBUG</button>
-        <button id="btn-journal">Journal</button>
+        <!--<button id="btn-journal">Journal</button> (add back later) -->
+        <button id="btn-about">About</button>
         <button id="btn-options">Options</button>
         <button id="btn-quit-game">Quit</button>
       </div>
@@ -43,7 +44,7 @@
     <main id="game-main">
       <!-- Weapons panel on the left -->
       <aside id="weapon-panel">
-        <h2>Debugging Tools</h2>
+        <h2>DeBugging Tools</h2>
         <button id="equip-swatter" class="weapon-button">
           <img src="../IMG/weapons/swatter/swatter.png" alt="Swatter" class="weapon-icon">
         </button>
@@ -64,7 +65,7 @@
         <div id="play-area">
           <!-- Bug Meter + Label -->
           <div id="bug-meter-container">
-            <div id="bug-meter-label">Bug Meter</div>
+            <div id="bug-meter-label"><strong>BUG METER</strong></div>
             <div id="bug-meter">
               <div id="bug-meter-fill"></div>
             </div>
@@ -74,7 +75,7 @@
           <img id="swatter-cursor" src="../IMG/swatter.png" alt="Swatter">
         </div>
         <div id="ability-section">
-          <h2>Debugger Abilities</h2>
+          <h2>DeBugger Abilities</h2>
           <div id="ability-bar">
             <button class="ability-button" data-ability-id="bugserk">
               <img src="../IMG/abilities/bugserk.png" alt="Bugserk" class="ability-icon">
@@ -105,7 +106,7 @@
 
       <!-- Upgrades panel on the right -->
       <aside id="upgrade-panel">
-        <h2>Debugger Upgrades</h2>
+        <h2>DeBugger Upgrades</h2>
 
         <div id="upgrade-list">
           <!-- 1. Increase ATK -->
@@ -115,7 +116,7 @@
                 <img src="../IMG/upgrades/increase_attack.png" alt="Increase ATK" class="upgrade-sprite">
               </div>
               <div class="upgrade-button-wrapper">
-              <button class="upgrade-button" data-upgrade-id="increase-atk">Upgrade: $10</button>
+                <button class="upgrade-button" data-upgrade-id="increase-atk">Upgrade: $10</button>
               </div>
             </div>
             <div class="upgrade-bottom">
@@ -133,7 +134,7 @@
                 <img src="../IMG/upgrades/increase_rad.png" alt="Increase RAD" class="upgrade-sprite">
               </div>
               <div class="upgrade-button-wrapper">
-              <button class="upgrade-button" data-upgrade-id="increase-rad">Upgrade: $10</button>
+                <button class="upgrade-button" data-upgrade-id="increase-rad">Upgrade: $10</button>
               </div>
             </div>
             <div class="upgrade-bottom">
@@ -151,8 +152,8 @@
                 <img src="../IMG/upgrades/decrease_wcd.png" alt="Decrease WCD" class="upgrade-sprite">
               </div>
               <div class="upgrade-button-wrapper">
-              <button class="upgrade-button" data-upgrade-id="decrease-wcd">Upgrade: $10</button>
-            </div>
+                <button class="upgrade-button" data-upgrade-id="decrease-wcd">Upgrade: $10</button>
+              </div>
             </div>
             <div class="upgrade-bottom">
               <h3>Decrease WCD</h3>
@@ -169,7 +170,7 @@
                 <img src="../IMG/upgrades/decrease_acd.png" alt="Decrease ACD" class="upgrade-sprite">
               </div>
               <div class="upgrade-button-wrapper">
-              <button class="upgrade-button" data-upgrade-id="decrease-acd">Upgrade: $10</button>
+                <button class="upgrade-button" data-upgrade-id="decrease-acd">Upgrade: $10</button>
               </div>
             </div>
             <div class="upgrade-bottom">
@@ -187,7 +188,7 @@
                 <img src="../IMG/upgrades/increase_money.png" alt="Increase $$$" class="upgrade-sprite">
               </div>
               <div class="upgrade-button-wrapper">
-              <button class="upgrade-button" data-upgrade-id="increase-money">Upgrade: $10</button>
+                <button class="upgrade-button" data-upgrade-id="increase-money">Upgrade: $10</button>
               </div>
             </div>
             <div class="upgrade-bottom">
@@ -205,7 +206,7 @@
                 <img src="../IMG/upgrades/increase_lvl.png" alt="Increase LVL" class="upgrade-sprite">
               </div>
               <div class="upgrade-button-wrapper">
-              <button class="upgrade-button" data-upgrade-id="increase-lvl">Upgrade: $10</button>
+                <button class="upgrade-button" data-upgrade-id="increase-lvl">Upgrade: $10</button>
               </div>
             </div>
             <div class="upgrade-bottom">
@@ -255,6 +256,30 @@
     </div>
   </div>
 
+  <!-- About Us Screen -->
+  <div id="about-screen" class="overlay-panel">
+    <div class="panel-content">
+      <h2>About DeBugger</h2>
+      <p>DeBugger was developed by:</p>
+      <ul>
+        <li><strong>Andrew Boland</strong> (aaboland@usca.edu) - Team Leader</li>
+        <li><strong>Evan McLeod</strong> (em127@usca.edu) - Lead Artist</li>
+        <li><strong>Judah Owen</strong> (jdowen@usca.edu) - Lead Developer</li>
+      </ul>
+      <p>Project Description: Implement a web-based bug clicker game where players
+        earn money by "swatting" randomly appearing bugs.
+      </p>
+      <p><strong>How to DeBug:</strong>
+      <p>Click on bugs as they appear to DeBug them and earn money. Use the money to upgrade your
+        tools and abilities to handle more challenging bugs. When you're ready, or when you run out
+        of upgrades to unlock, increase the level to face tougher challenges and unlock the next tier.</p>
+      </p>
+      <p>Can you survive the onslaught?</p>
+      <p><strong>Get DeBuggin'!</strong></p>
+      <button class="close-btn" id="close-about">Close</button>
+    </div>
+  </div>
+
   <!-- Options Screen -->
   <div id="options-screen" class="overlay-panel">
     <div class="panel-content">
@@ -283,7 +308,7 @@
 
       <div class="pause-buttons">
         <button id="btn-rebug">REBUG</button>
-        <button id="btn-pause-journal">Journal</button>
+        <!--<button id="btn-pause-journal">Journal</button> (add back later) -->
         <button id="btn-quit">Quit</button>
       </div>
     </div>

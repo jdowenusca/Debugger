@@ -89,13 +89,13 @@ class SwatterWeapon extends BaseWeapon {
     super({
       name: "Bug Swatter",
       damage: 1,       
-      hitRadius: 40,
+      hitRadius: 30,
       cursorSprite: "../IMG/weapons/swatter/swatter.png",
       cursorWidth: 50,
-      cursorOffsetX: -30,
+      cursorOffsetX: -25,
       cursorOffsetY: -30,
-      cooldownMs: 500, // 0.5 seconds between swings
-      description: "A simple swatter for quick bug bashing."
+      cooldownMs: 600, // 0.5 seconds between swings
+      description: "Tried and true classic for bug extermination. "
     });
   }
 }
@@ -105,15 +105,15 @@ class HammerWeapon extends BaseWeapon {
   constructor() {
     super({
       name: "Bug Hammer",
-      damage: 3,
+      damage: 5,
       hitRadius: 55,
       cursorSprite: "../IMG/weapons/hammer/hammer.png",
       cursorWidth: 90,
       cursorHeight: 120,
       cursorOffsetX: -15,
       cursorOffsetY: -40,
-      cooldownMs: 1000, // slower but stronger
-      description: "A heavy hammer for heavy duty debugging."
+      cooldownMs: 1400, // slower but stronger
+      description: "A heavy hammer for heavy duty DeBugging. Slow, but reliable."
     });
   }
 }
