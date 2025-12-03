@@ -37,7 +37,12 @@
   <!-- Main Game Container -->
   <div id="game-container">
     <header id="game-header">
-      <button id="pause-button">||</button>
+      <button id="pause-button"> || </button>
+
+      <div id="score-container">
+        <img src="../IMG/menu/Score.png" alt="Score" class="score-label">
+        <span id="score-value" class="score-value">0</span>
+      </div>
 
       <div id="logo-wrapper">
         <img id="game-logo" src="../IMG/menu/Debuggerlogo.png" alt="Game Logo">
@@ -60,7 +65,9 @@
     <main id="game-main">
       <!-- Weapons panel on the left -->
       <aside id="weapon-panel">
-        <h2>DeBugging Tools</h2>
+        <div class="panel-title">
+          <img src="../IMG/menu/Tools.png" alt="Tools" class="panel-title-img">
+        </div>
         <button id="equip-swatter" class="weapon-button">
           <img src="../IMG/weapons/swatter/swatter.png" alt="" class="weapon-icon">
         </button>
@@ -91,41 +98,43 @@
           <img id="swatter-cursor" src="../IMG/swatter.png" alt="Swatter">
         </div>
         <div id="ability-section">
-          <h2>DeBugger Abilities</h2>
+          <div class="panel-title">
+            <img src="../IMG/menu/Abilities.png" alt="Abilities" class="panel-title-img">
+          </div>
           <div id="ability-bar">
             <button class="ability-button" data-ability-id="bugserk">
-              <img src="../IMG/abilities/bugserk.png" alt="" class="ability-icon"
-                onerror="this.src='../IMG/abilities/placeholder.png'">
+              <img src="../IMG/abilities/bugserk.png" alt="Bugserk" class="ability-icon"
+                onerror="this.onerror=null; this.src='../IMG/abilities/placeholder.png'">
               <span class="ability-label">Bugserk</span>
             </button>
 
             <button class="ability-button" data-ability-id="bug-tape">
-              <img src="../IMG/abilities/bug_tape.png" alt="" class="ability-icon"
-                onerror="this.src='../IMG/abilities/placeholder.png'">
+              <img src="../IMG/abilities/bug_tape.png" alt="Bug Tape" class="ability-icon"
+                onerror="this.onerror=null; this.src='../IMG/abilities/placeholder.png'">
               <span class="ability-label">Bug Tape</span>
             </button>
 
             <button class="ability-button" data-ability-id="bug-drone">
-              <img src="../IMG/abilities/bug_drone.png" alt="" class="ability-icon"
-                onerror="this.src='../IMG/abilities/placeholder.png'">
-              <span class="ability-label">Bug Drone</span>
+              <img src="../IMG/abilities/bug_drone.png" alt="Cordyceps" class="ability-icon"
+                onerror="this.onerror=null; this.src='../IMG/abilities/placeholder.png'">
+              <span class="ability-label">Cordyceps</span>
             </button>
 
             <button class="ability-button" data-ability-id="immortal-snail">
-              <img src="../IMG/abilities/immortal_snail.png" alt="" class="ability-icon"
-                onerror="this.src='../IMG/abilities/placeholder.png'">
+              <img src="../IMG/abilities/immortal_snail.png" alt="ImmortalSnail" class="ability-icon"
+                onerror="this.onerror=null; this.src='../IMG/abilities/placeholder.png'">
               <span class="ability-label">Immortal Snail</span>
             </button>
 
             <button class="ability-button" data-ability-id="singularity">
-              <img src="../IMG/abilities/singularity.png" alt="" class="ability-icon"
-                onerror="this.src='../IMG/abilities/placeholder.png'">
+              <img src="../IMG/abilities/singularity.png" alt="Singularity" class="ability-icon"
+                onerror="this.onerror=null; this.src='../IMG/abilities/placeholder.png'">
               <span class="ability-label">Singularity</span>
             </button>
 
             <button class="ability-button" data-ability-id="slapshot">
-              <img src="../IMG/abilities/slapshot.png" alt="" class="ability-icon"
-                onerror="this.src='../IMG/abilities/placeholder.png'">
+              <img src="../IMG/abilities/slapshot.png" alt="Slapshot" class="ability-icon"
+                onerror="this.onerror=null; this.src='../IMG/abilities/placeholder.png'">
               <span class="ability-label">Slapshot</span>
             </button>
           </div>
@@ -134,7 +143,9 @@
 
       <!-- Upgrades panel on the right -->
       <aside id="upgrade-panel">
-        <h2>DeBugger Upgrades</h2>
+        <div class="panel-title">
+          <img src="../IMG/menu/Upgrades.png" alt="" class="panel-title-img">
+        </div>
 
         <div id="upgrade-list">
           <!-- 1. Increase ATK -->
@@ -334,12 +345,18 @@
   <!-- Pause Screen -->
   <div id="pause-screen" class="overlay-panel">
     <div class="panel-content pause-content">
-      <h2>Paused</h2>
+      <img src="../IMG/menu/Paused.png" alt="Paused" class="overlay-title-img">
 
       <div class="pause-buttons">
-        <button id="btn-rebug">REBUG</button>
-        <!--<button id="btn-pause-journal">Journal</button> (add back later) -->
-        <button id="btn-quit">Quit</button>
+        <button id="btn-rebug" class="overlay-button">
+          <img src="../IMG/menu/Rebug.png" alt="Rebug" class="overlay-button-img">
+        </button>
+        <!--<button id="btn-pause-journal" class="overlay-button">
+          <img src="../IMG/menu/Journal.png" alt="" class="overlay-button-img">
+        </button>-->
+        <button id="btn-quit" class="overlay-button">
+          <img src="../IMG/menu/Quit.png" alt="Quit" class="overlay-button-img">
+        </button>
       </div>
     </div>
   </div>
@@ -347,12 +364,25 @@
   <!-- Bugged Game Over Screen -->
   <div id="bugged-screen" class="overlay-panel">
     <div class="panel-content bugged-content">
+
+      <div id="bugged-score-row">
+        <img src="../IMG/menu/Score.png" alt="Score" class="bugged-score-label">
+        <span class="bugged-score-separator">:</span>
+        <span id="bugged-score-value" class="bugged-score-value">0</span>
+      </div>
+
       <h2>You've been Bugged!</h2>
-      <p>The bugs overwhelmed you...</p>
+      <p>You have failed as a DeBugger.</p>
+      <p>But don't worry, you can <strong>REBUG</strong> the game and try again!</p>
+      <p>Or you can <strong>Quit</strong> like a coward.</p>
 
       <div class="bugged-buttons">
-        <button id="btn-rebug-gameover">REBUG</button>
-        <button id="btn-quit-from-bugged">Quit</button>
+        <button id="btn-rebug-gameover" class="overlay-button">
+          <img src="../IMG/menu/Rebug.png" alt="Rebug" class="overlay-button-img">
+        </button>
+        <button id="btn-quit-from-bugged" class="overlay-button">
+          <img src="../IMG/menu/Quit.png" alt="Quit" class="overlay-button-img">
+        </button>
       </div>
     </div>
   </div>

@@ -43,6 +43,11 @@ const equipHammerBtn = document.getElementById("equip-hammer");
 const weaponPanel = document.getElementById("weapon-panel");
 const weaponTooltip = document.getElementById("weapon-tooltip");
 
+const moneyDisplay = document.getElementById("money-value");
+const bugsKilledDisplay = document.getElementById("bugs-killed-value");
+const scoreDisplay = document.getElementById("score-value");
+const buggedScoreDisplay = document.getElementById("bugged-score-value");
+
 // --------------------
 //  GAME STATE
 // --------------------
@@ -249,6 +254,14 @@ function initPerWeaponUpgradeState() {
   });
 }
 
+function normalizeZoom() {
+  const zoomLevel = window.devicePixelRatio;  // 1.0, 1.25, 1.5, etc.
+  const scale = 1 / zoomLevel;
+
+  const game = document.getElementById("game-container");
+  game.style.transform = `scale(${scale})`;
+}
+
 // Reset all upgrades to base state (for new game)
 function resetUpgradesToBase() {
   // Reset global upgrade config
@@ -262,10 +275,6 @@ function resetUpgradesToBase() {
   initPerWeaponUpgradeState();
 }
 
-// UI Refs
-const moneyDisplay = document.getElementById("money-value");
-const bugsKilledDisplay = document.getElementById("bugs-killed-value");
-
 function updateStatsUI() {
   // keep internal money sane to 2 decimals
   money = Math.round(money * 100) / 100;
@@ -276,6 +285,14 @@ function updateStatsUI() {
 
   if (bugsKilledDisplay) {
     bugsKilledDisplay.textContent = `${bugsKilled}`;
+  }
+
+  if (scoreDisplay) {
+    scoreDisplay.textContent = `${bugScoreTotal}`;
+  }
+
+  if (buggedScoreDisplay) {
+    buggedScoreDisplay.textContent = `${bugScoreTotal}`;
   }
 }
 
@@ -1332,3 +1349,6 @@ updateWeaponAvailability();
 updateAbilityAvailability();
 
 stripNativeTooltips();
+normalizeZoom();
+// Listen for zoom changes (e.g., user changes browser zoom or display DPI)
+window.addEventListener("resize", normalizeZoom);

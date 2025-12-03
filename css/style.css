@@ -154,6 +154,11 @@ body.game-active::before {
   line-height: 1.2;
 }
 
+html, body {
+  zoom: reset;          /* prevents browser-based zoom scaling */
+  touch-action: none;
+}
+
 #game-container {
   height: auto;
   width: 1000px;
@@ -177,10 +182,27 @@ body.game-active::before {
 
 #game-header {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto auto 1fr auto; /* Pause | Score | Logo | Stats */
   align-items: center;
   column-gap: 8px;
   margin-bottom: 12px;
+}
+
+#score-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.score-label {
+  height: 18px;   /* tweak to size your "Score" sprite */
+  width: auto;
+  display: block;
+}
+
+.score-value {
+  font-family: monospace;
+  font-size: 1.2rem;  /* bump this up/down as desired */
 }
 
 #logo-wrapper {
@@ -193,6 +215,18 @@ body.game-active::before {
   height: auto;
   width: 300px;
   opacity: 0.9;
+}
+
+.panel-title {
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: center;
+}
+
+.panel-title-img {
+  height: 30px;     /* tweak this for label size */
+  width: auto;
+  display: block;
 }
 
 #stats {
@@ -218,7 +252,7 @@ body.game-active::before {
   font-family: monospace;
   min-width: 80px;
   text-align: right;
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 
 #game-main {
@@ -324,6 +358,31 @@ body.game-active::before {
 
 .bugged-buttons button:hover {
   background: #333;
+}
+
+#bugged-score-row {
+  margin-top: 4px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.bugged-score-label {
+  height: 18px;   /* tweak to match the HUD score label size */
+  width: auto;
+  display: block;
+}
+
+.bugged-score-separator {
+  font-family: monospace;
+  font-size: 1.2rem;
+}
+
+.bugged-score-value {
+  font-family: monospace;
+  font-size: 1.2rem;
 }
 
 /* Play area where bugs will appear */
@@ -666,15 +725,26 @@ body.game-active::before {
   animation: fadeInPanel 0.3s ease;
 }
 
+.overlay-title-img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 16px;
+  display: block;
+}
+
 .panel-content {
   background: #181818;
   border-radius: 8px;
   border: 1px solid #555;
   padding: 20px;
-  max-width: 640px;
-  width: 90%;
+  max-width: calc(100% - 40px); /* keep some padding to viewport edges */
+  width: auto;                  /* 🔹 let content define width */
   max-height: 80vh;
   overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .panel-content h2 {
@@ -688,8 +758,6 @@ body.game-active::before {
 .journal-section h3 {
   margin-bottom: 4px;
 }
-
-
 
 .close-btn {
   margin-top: 16px;
@@ -710,12 +778,36 @@ body.game-active::before {
   margin-bottom: 16px;
 }
 
-.pause-buttons {
+.pause-buttons,
+.bugged-buttons {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  align-items: stretch;
+  align-items: column;
   margin-top: 8px;
+}
+
+.overlay-button {
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.overlay-button-img {
+  display: block;
+  max-width: 220px;  /* tweak to control button sprite size */
+  width: 100%;
+  height: auto;
+}
+
+.overlay-button:hover .overlay-button-img {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.overlay-button:active .overlay-button-img {
+  transform: translateY(0);
 }
 
 .pause-buttons button {
