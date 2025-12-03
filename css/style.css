@@ -81,11 +81,42 @@ body.game-active::before {
   color: #f5f5f5;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#title-buttons button img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.title-button {
+  width: 220px;       /* Adjust to your preferred button width */
+  height: 100px;       /* Adjust to your preferred button height */
+  padding: 0;         
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+  border: 1px solid #666;
+  background: #262626;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.title-button img {
+  max-width: 90%;    /* Image scales automatically */
+  max-height: 90%;   /* Keeps consistent padding inside button */
+  object-fit: contain;
+  display: block;
 }
 
 #title-buttons button:hover {
   background: #333;
-  box-shadow: 0 0 10px rgba(0, 255, 150, 0.4);
+  box-shadow: 0 0 10px rgba(255, 251, 2, 0.582);
   transform: translateY(-1px);
 }
 
@@ -124,6 +155,7 @@ body.game-active::before {
 }
 
 #game-container {
+  height: auto;
   width: 1000px;
   max-width: 100%;
   background: #1e1e1e;
@@ -159,12 +191,34 @@ body.game-active::before {
 
 #game-logo {
   height: auto;
-  width: 200px;
+  width: 300px;
   opacity: 0.9;
 }
 
-#stats span {
-  margin-left: 16px;
+#stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-label {
+  height: 30px;    /* tweak to match your sprite */
+  width: auto;
+  display: block;
+}
+
+.stat-value {
+  font-family: monospace;
+  min-width: 80px;
+  text-align: right;
+  font-size: 1rem;
 }
 
 #game-main {
@@ -703,8 +757,8 @@ body.game-active::before {
   position: absolute;
   top: 12px;
   left: 12px;
-  width: 32px;
-  height: 32px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   border: 1px solid #666;
   background: #262626;
@@ -849,14 +903,6 @@ body.game-active::before {
   user-select: none;
   transform: translate(-50%, -50%);
   z-index: 15; /* above bugs, below menus */
-}
-
-#money-display,
-#bugs-killed-display {
-  display: inline-block;
-  min-width: 120px;  /* adjust for however big the numbers get */
-  text-align: right;  /* keeps numbers aligned nicely */
-  font-family: monospace;
 }
 
 .bug {

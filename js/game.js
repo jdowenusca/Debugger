@@ -263,19 +263,19 @@ function resetUpgradesToBase() {
 }
 
 // UI Refs
-const moneyDisplay = document.getElementById("money-display");
-const bugsKilledDisplay = document.getElementById("bugs-killed-display");
+const moneyDisplay = document.getElementById("money-value");
+const bugsKilledDisplay = document.getElementById("bugs-killed-value");
 
 function updateStatsUI() {
   // keep internal money sane to 2 decimals
   money = Math.round(money * 100) / 100;
 
   if (moneyDisplay) {
-    moneyDisplay.textContent = `Money: $${money.toFixed(2)}`;
+    moneyDisplay.textContent = `$${money.toFixed(2)}`;
   }
 
   if (bugsKilledDisplay) {
-    bugsKilledDisplay.textContent = `Bugs killed: ${bugsKilled}`;
+    bugsKilledDisplay.textContent = `${bugsKilled}`;
   }
 }
 
@@ -374,7 +374,7 @@ function quitGameCompletely() {
 
   // If that fails, fallback
   document.body.innerHTML = `
-    <div style="text-align:center; padding-top:50px; color:white; font-size:24px;">
+    <div style="text-align:center; padding-top:50px; color:black; font-size:24px;">
       <p>Thank you for playing DeBugger!</p>
       <p>You may close this tab now.</p>
     </div>

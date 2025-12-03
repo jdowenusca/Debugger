@@ -18,10 +18,18 @@
       <img id="title-logo" src="../IMG/menu/Debuggerlogo.png" alt="Debugger Logo">
 
       <div id="title-buttons">
-        <button id="btn-debug">DEBUG</button>
-        <!--<button id="btn-journal">Journal</button> (add back later) -->
-        <button id="btn-options">Options</button>
-        <button id="btn-quit-game">Quit</button>
+        <button id="btn-debug" class="title-button">
+          <img src="../IMG/menu/Debug.png" alt="DEBUG">
+        </button>
+        <!--<button id="btn-journal">
+          <img src="../IMG/menu/Journal.png" alt="Journal">
+        </button> (add back later) -->
+        <button id="btn-options" class="title-button">
+          <img src="../IMG/menu/Options.png" alt="Options">
+        </button>
+        <button id="btn-quit-game" class="title-button">
+          <img src="../IMG/menu/Quit.png" alt="Quit">
+        </button>
       </div>
     </div>
   </div>
@@ -36,9 +44,17 @@
       </div>
 
       <div id="stats">
-        <span id="money-display">Money: $0</span>
-        <span id="bugs-killed-display">Bugs killed: 0</span>
+        <div class="stat-item">
+          <img src="../IMG/menu/Money.png" alt="Money" class="stat-label">
+          <span id="money-value" class="stat-value">$0.00</span>
+        </div>
+
+        <div class="stat-item">
+          <img src="../IMG/menu/Kills.png" alt="Kills" class="stat-label">
+          <span id="bugs-killed-value" class="stat-value">0</span>
+        </div>
       </div>
+
     </header>
 
     <main id="game-main">
