@@ -18,13 +18,17 @@ const btnDebug = document.getElementById("btn-debug");
 const btnJournal = document.getElementById("btn-journal");
 const btnOptions = document.getElementById("btn-options");
 const btnAbout = document.getElementById("btn-about");
+const btnLeaderboard = document.getElementById("btn-leaderboard");
 
 const journalScreen = document.getElementById("journal-screen");
 const optionsScreen = document.getElementById("options-screen");
 const aboutScreen = document.getElementById("about-screen");
+const leaderboardScreen = document.getElementById("leaderboard-screen");
+
 const closeJournalBtn = document.getElementById("close-journal");
 const closeOptionsBtn = document.getElementById("close-options");
 const closeAboutBtn = document.getElementById("close-about");
+const closeLeaderboardBtn = document.getElementById("close-leaderboard");
 const quitGameBtn = document.getElementById("btn-quit-game");
 
 const pauseScreen = document.getElementById("pause-screen");
@@ -365,7 +369,7 @@ function closeOptions() {
   }
 }
 
-// Show / hide About Us
+// Show / hide About DeBugger
 function openAbout() {
   if (aboutScreen) {
     aboutScreen.classList.add("active");
@@ -377,6 +381,31 @@ function closeAbout() {
     aboutScreen.classList.remove("active");
   }
 }
+
+// Show / hide Leaderboard
+function openLeaderboard() {
+  if (leaderboardScreen) {
+    leaderboardScreen.classList.add("active");
+  }
+}
+
+function closeLeaderboard() {
+  if (leaderboardScreen) {
+    leaderboardScreen.classList.remove("active");
+  }
+}
+
+if (btnLeaderboard) {
+  btnLeaderboard.addEventListener("click", openLeaderboard);
+}
+
+if (closeLeaderboardBtn) {
+  closeLeaderboardBtn.addEventListener("click", closeLeaderboard);
+}
+
+leaderboardScreen.addEventListener("click", (e) => {
+  if (e.target === leaderboardScreen) closeLeaderboard();
+});
 
 if (quitGameBtn) {
   quitGameBtn.addEventListener("click", () => {
@@ -859,7 +888,7 @@ if (equipHammerBtn) {
 }
 
 // Allow clicking outside panel to close
-[journalScreen, optionsScreen, pauseScreen].forEach((overlay) => {
+[journalScreen, optionsScreen, pauseScreen, aboutScreen, leaderboardScreen].forEach((overlay) => {
   if (!overlay) return;
   overlay.addEventListener("click", (event) => {
     if (event.target === overlay) {

@@ -876,6 +876,37 @@ html, body {
   transform: translateY(0);
 }
 
+.leaderboard-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #666;
+  background: #262626;
+  color: #f5f5f5;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+  z-index: 15;
+}
+
+.leaderboard-button:hover {
+  background: #333;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+  transform: translateY(-1px);
+}
+
+.leaderboard-button:active {
+  transform: translateY(0);
+}
+
 #about-screen {
   z-index: 30; /* same layer as Journal/Options */
 }
@@ -950,6 +981,44 @@ html, body {
     transparent
   );
   margin: 20px 0;
+}
+
+.leaderboard-content {
+  background: #181818;
+  border-radius: 8px;
+  border: 1px solid #555;
+  padding: 20px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ranking-list {
+  width: 100%;
+  border-collapse: collapse;
+  color: #f5f5f5;
+  margin-bottom: 16px;
+}
+
+.ranking-list th,
+.ranking-list td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #444;
+  text-align: center;
+}
+
+.ranking-list th {
+  background: #222;
+  font-weight: bold;
+}
+
+.ranking-list tr:nth-child(even) {
+  background: #202020;
 }
 
 /* Make pause below, journal/options above */

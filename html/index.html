@@ -14,6 +14,7 @@
   <!-- Title Screen -->
   <div id="title-screen">
     <button id="btn-about" class="about-button"> ? </button>
+    <button id="btn-leaderboard" class="leaderboard-button">🏆</button>
     <div id="title-content">
       <img id="title-logo" src="../IMG/menu/Debuggerlogo.png" alt="Debugger Logo">
 
@@ -392,6 +393,116 @@
   <script src="../JS/weapons.js"></script>
   <script src="../JS/powerups.js"></script>
   <script src="../JS/game.js"></script>
+
+  <!-- Leaderboard Screen -->
+<div id="leaderboard-screen" class="overlay-panel">
+  <div class="panel-content leaderboard-content">
+    <img src="../IMG/ui/leaderboard_title.png" alt="" class="overlay-title-img">
+
+    <table id="leaderboard-list" class="ranking-list">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td id="player1-name">Player1</td>
+          <td id="player1-score">1500</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td id="player2-name">Player2</td>
+          <td id="player2-score">1200</td>
+        </tr>
+        <tr> 
+          <td>3</td>
+          <td id="player3-name">Player3</td>
+          <td id="player3-score">1000</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td id="player4-name">Player4</td>
+          <td id="player4-score">800</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td id="player5-name">Player5</td>
+          <td id="player5-score">600</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td id="player6-name">Player6</td>
+          <td id="player6-score">500</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td id="player7-name">Player7</td>
+          <td id="player7-score">400</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td id="player8-name">Player8</td>
+          <td id="player8-score">300</td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td id="player9-name">Player9</td>
+          <td id="player9-score">200</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td id="player10-name">Player10</td>
+          <td id="player10-score">100</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button class="close-btn" id="close-leaderboard">Close</button>
+  </div>
+</div>
+
+  <!-- Firebase Database -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js';
+    // Add Firebase products that you want to use
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js';
+    import { getFirestore, onSnapshot, collection, addDoc,query,orderBy,limit } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js';
+
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCj56GT533SFfRFZUfZ3ZTrBMVVQBPsrcw",
+      authDomain: "owendatabase2025.firebaseapp.com",
+      projectId: "owendatabase2025",
+      storageBucket: "owendatabase2025.firebasestorage.app",
+      messagingSenderId: "255375433561",
+      appId: "1:255375433561:web:2c88349ef48e8493fef648",
+      measurementId: "G-TSJTVN6ZBP"
+    };
+
+    const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const quancollection = collection(db, 'DeBugger');
+
+
+    addDoc(quancollection, {
+      name: "Test Player",
+      score: 989
+    });
+
+    const q = query(quancollection, orderBy("score", "desc"), limit(10));
+    onSnapshot(q, (querySnapshot) => {
+      const leaderboard = [];
+      querySnapshot.forEach((doc) => {
+        leaderboard.push(doc.data());
+      });
+      console.log("Current leaderboard: ", leaderboard);
+
+    });
+  </script>
 
 </body>
 
