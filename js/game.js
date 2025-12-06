@@ -260,7 +260,7 @@ function initPerWeaponUpgradeState() {
 
 function normalizeZoom() {
   const zoomLevel = window.devicePixelRatio;  // 1.0, 1.25, 1.5, etc.
-  const scale = 1 / zoomLevel;
+  const scale = 1.1 / zoomLevel;
 
   const game = document.getElementById("game-container");
   game.style.transform = `scale(${scale})`;
@@ -385,7 +385,9 @@ function closeAbout() {
 // Show / hide Leaderboard
 function openLeaderboard() {
   if (leaderboardScreen) {
-    leaderboardScreen.classList.add("active");
+    leaderboardScreen.addEventListener("click", (e) => {
+      if (e.target === leaderboardScreen) closeLeaderboard();
+    });
   }
 }
 
@@ -996,11 +998,9 @@ if (playArea && swatter) {
   });
 
   playArea.addEventListener("mousemove", (event) => {
-    const rect = playArea.getBoundingClientRect();
-
-    // Mouse position relative to playArea’s top-left corner
-    const baseX = event.clientX - rect.left;
-    const baseY = event.clientY - rect.top;
+    // Use element-relative coordinates, same as handleSwat()
+    const baseX = event.offsetX;
+    const baseY = event.offsetY;
 
     const offsetX = currentWeapon?.cursorOffsetX ?? 0;
     const offsetY = currentWeapon?.cursorOffsetY ?? 0;
@@ -1009,12 +1009,11 @@ if (playArea && swatter) {
     swatter.style.top = baseY + offsetY + "px";
   });
 
-
   playArea.addEventListener("mouseleave", () => {
     swatter.style.display = "none";
   });
 
-  // Swat on click
+  // Swat on click (unchanged)
   playArea.addEventListener("click", (event) => {
     swatter.style.userSelect = "none";
     event.preventDefault();
