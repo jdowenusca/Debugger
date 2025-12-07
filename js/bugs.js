@@ -276,12 +276,56 @@ class AntBug extends BaseBug {
   }
 }
 
+// Small, fast, jittery – like a faster ant with slightly higher score
+class FlyBug extends BaseBug {
+  constructor(playArea) {
+    super(playArea, {
+      hp: 5,                      // same HP as ant
+      speed: 2.8,                 // faster than ant (2.0)
+      size: 28,
+      spriteWidth: 20,
+      spriteHeight: 20,
+
+      walkFrames: [
+        "../IMG/bugs/fly/flyBase.png",
+      ],
+
+      deathFrame: "../IMG/bugs/fly/flyDead.png",
+      animationIntervalMs: 90,    // quick flappy animation
+
+      reward: 1.0,                // more payout than ant (0.5)
+      pathChangeChance: 0.25,     // very high = sporadic movement
+      score: 2                    // slightly higher score than ant (1)
+    });
+  }
+
+  // Flies: very erratic, strong bias toward changing direction often
+  choosePath() {
+    // Weight diagonals a bit more to feel “skittery” and less straight-line
+    // [N,   NE,  E,   SE,  S,   SW,  W,   NW]
+    const weights = [
+      1,   // N
+      3,   // NE
+      1,   // E
+      3,   // SE
+      1,   // S
+      3,   // SW
+      1,   // W
+      3    // NW
+    ];
+
+    const idx = pickWeightedDirectionIndex(weights);
+    const dir = BUG_DIRECTIONS[idx];
+    this.setDirectionFromVector(dir.dx, dir.dy);
+  }
+}
+
 // Small, weak, fast, jittery
 class RoachBug extends BaseBug {
   constructor(playArea) {
     super(playArea, {
       hp: 8,
-      speed: 3.0,
+      speed: 2.5,
       size: 38,
       spriteWidth: 26,
       spriteHeight: 42,
@@ -297,7 +341,7 @@ class RoachBug extends BaseBug {
       
       reward: 3,
       pathChangeChance: 0.15,
-      score: 2
+      score: 3
     });
   }
 
@@ -342,7 +386,7 @@ class SpiderBug extends BaseBug {
       
       reward: 10,
       pathChangeChance: 0.12,
-      score: 5
+      score: 10
     });
   }
 
@@ -366,5 +410,79 @@ class SpiderBug extends BaseBug {
   }
 }
 
-// You can keep adding more bug types later:
-// class WaspBug extends BaseBug { ... }
+// Upgraded fly: tougher, faster, aggressive, very erratic
+class WaspBug extends BaseBug {
+  constructor(playArea) {
+    super(playArea, {
+      hp: 30,                     // tougher than fly/roach
+      speed: 4.2,                 // quite fast
+      size: 70,
+      spriteWidth: 24,
+      spriteHeight: 28,
+
+      walkFrames: [
+        "../IMG/bugs/wasp/waspBack.png",
+        "../IMG/bugs/wasp/waspBase.png"
+      ],
+      deathFrame: "../IMG/bugs/wasp/waspDead.png",
+      animationIntervalMs: 80,    // snappy animation
+
+      reward: 6,                  // good money
+      pathChangeChance: 0.3,      // very high – constantly juking
+      score: 15                    // above fly, below spider
+    });
+  }
+
+  // Wasps: evenly likely to go in any direction
+  choosePath() {
+    // Equal weights across all 8 directions
+    const weights = [1, 1, 1, 1, 1, 1, 1, 1];
+    const idx = pickWeightedDirectionIndex(weights);
+    const dir = BUG_DIRECTIONS[idx];
+    this.setDirectionFromVector(dir.dx, dir.dy);
+  }
+}
+
+// Upgraded roach: very tanky, slower, prefers straight lines
+class BeetleBug extends BaseBug {
+  constructor(playArea) {
+    super(playArea, {
+      hp: 100,                    // toughest bug in the roster
+      speed: 1.0,                 // slowest of all
+      size: 180,
+      spriteWidth: 40,
+      spriteHeight: 48,
+
+      walkFrames: [
+        "../IMG/bugs/beetle/beetleBack.png",
+        "../IMG/bugs/beetle/beetleBase.png"
+      ],
+      
+      deathFrame: "../IMG/bugs/beetle/beetleDead.png",
+      animationIntervalMs: 130,   // lumbering steps
+
+      reward: 20,                 // big payout
+      pathChangeChance: 0.05,     // less twitchy, more committed
+      score: 20                    // higher than roach, below “boss-tier” if you add one
+    });
+  }
+
+  // Beetles: mostly cardinal directions (N/S/E/W), less diagonals
+  choosePath() {
+    // Weights: [N, NE, E, SE, S, SW, W, NW]
+    const weights = [
+      4,  // N
+      1,  // NE
+      4,  // E
+      1,  // SE
+      4,  // S
+      1,  // SW
+      4,  // W
+      1   // NW
+    ];
+
+    const idx = pickWeightedDirectionIndex(weights);
+    const dir = BUG_DIRECTIONS[idx];
+    this.setDirectionFromVector(dir.dx, dir.dy);
+  }
+}

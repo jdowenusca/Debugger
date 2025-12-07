@@ -109,9 +109,9 @@ class HammerWeapon extends BaseWeapon {
       hitRadius: 55,
       cursorSprite: "../IMG/weapons/hammer/hammer.png",
       cursorWidth: 90,
-      cursorHeight: 120,
+      cursorHeight: 90,
       cursorOffsetX: -15,
-      cursorOffsetY: -40,
+      cursorOffsetY: -10,
       cooldownMs: 1400, // slower but stronger
       description: "A heavy hammer for heavy duty DeBugging. Slow, but reliable."
     });

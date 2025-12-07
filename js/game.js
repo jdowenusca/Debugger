@@ -40,6 +40,9 @@ const btnQuit = document.getElementById("btn-quit");
 const buggedScreen = document.getElementById("bugged-screen");
 const btnRebugGameOver = document.getElementById("btn-rebug-gameover");
 const btnQuitFromBugged = document.getElementById("btn-quit-from-bugged");
+const initialsInput = document.getElementById("player-initials");
+const submitScoreButton = document.getElementById("submit-score-button");
+const submitMessage = document.getElementById("submit-message");
 
 const equipSwatterBtn = document.getElementById("equip-swatter");
 const equipHammerBtn = document.getElementById("equip-hammer");
@@ -52,9 +55,46 @@ const bugsKilledDisplay = document.getElementById("bugs-killed-value");
 const scoreDisplay = document.getElementById("score-value");
 const buggedScoreDisplay = document.getElementById("bugged-score-value");
 
+const BUG_METER_MAX = 100;                    // max bug meter value
+const BASE_BUG_SPAWN_INTERVAL = 3000;         // ms at LVL 1
+const MIN_BUG_SPAWN_INTERVAL = 500;           // absolute minimum so engine doesn't explode
+const BUG_SPAWN_DECREASE_PER_LEVEL = 250;     // ms removed per level
+const BASE_BOSS_THRESHOLD = 0.95;             // starting boss threshold at LVL 1
+const MIN_BOSS_THRESHOLD = 0.80;              // don't let bosses exceed 20% total chance
+const BOSS_THRESHOLD_STEP_PER_LEVEL = 0.01;   // each LVL lowers threshold by 0.01
+
+
 // --------------------
 //  GAME STATE
 // --------------------
+
+function recalcBugSpawnInterval() {
+  // Linear decrease: 3000, 2750, 2500, 2250, ... down to min
+  bugSpawnIntervalMs = Math.max(
+    MIN_BUG_SPAWN_INTERVAL,
+    BASE_BUG_SPAWN_INTERVAL - (gameLevel - 1) * BUG_SPAWN_DECREASE_PER_LEVEL
+  );
+
+  restartBugSpawner();
+}
+
+function getPlayAreaCoordsFromEvent(event) {
+  if (!playArea) return { x: 0, y: 0 };
+
+  // Start with offsetX/Y relative to the event.target
+  let x = event.offsetX;
+  let y = event.offsetY;
+  let node = event.target;
+
+  // Walk up the offsetParent chain until we reach the playArea
+  while (node && node !== playArea) {
+    x += node.offsetLeft || 0;
+    y += node.offsetTop || 0;
+    node = node.offsetParent;
+  }
+
+  return { x, y };
+}
 
 //ability tooltip descriptions
 const abilityInfo = {
@@ -94,7 +134,8 @@ const abilityLevelRequirements = {
   "slapshot": 12,
 };
 
-const BUG_METER_MAX = 100; // tune this as you like
+// Global game state variables
+
 let bugMeterValue = 0;
 let bugScoreTotal = 0; // for future "Score" display
 var isPaused = true;       // Game starts paused!
@@ -107,6 +148,7 @@ let bugsKilled = 0;
 let bugSpawnIntervalMs = 3000;
 let bugSpawnTimerId = null;
 let journalOpenedFromPause = false;
+let scoreSubmittedForRun = false;
 
 // Weapon inventory
 const weaponInventory = {
@@ -140,7 +182,7 @@ const upgradeConfig = {
     requiredLevel: 1,
     baseCost: 10,
     cost: 10,
-    costMultiplier: 2.0,
+    costMultiplier: 1.2,
     lastPurchaseLevel: 0, // NEW: 0 means “never bought”
     apply() {
       if (!currentWeapon) return;
@@ -153,7 +195,7 @@ const upgradeConfig = {
     requiredLevel: 1,
     baseCost: 20,
     cost: 20,
-    costMultiplier: 3.0,
+    costMultiplier: 1.5,
     lastPurchaseLevel: 0,
     apply() {
       if (!currentWeapon) return;
@@ -166,7 +208,7 @@ const upgradeConfig = {
     requiredLevel: 1,
     baseCost: 30,
     cost: 30,
-    costMultiplier: 4.0,
+    costMultiplier: 1.8,
     lastPurchaseLevel: 0,
     apply() {
       if (!currentWeapon) return;
@@ -179,7 +221,7 @@ const upgradeConfig = {
     requiredLevel: 1,
     baseCost: 40,
     cost: 40,
-    costMultiplier: 4.0,
+    costMultiplier: 2.0,
     lastPurchaseLevel: 0,
     apply() {
       abilityCooldownBonusMs.value += 100;
@@ -191,13 +233,13 @@ const upgradeConfig = {
     requiredLevel: 1,
     baseCost: 100,
     cost: 100,
-    costMultiplier: 5.0,
+    costMultiplier: 2.5,
     lastPurchaseLevel: 0,
     apply() {
       if (window.moneyMultiplier === undefined) {
         window.moneyMultiplier = 1;
       }
-      window.moneyMultiplier *= 1.20;
+      window.moneyMultiplier *= 1.30;
     }
   },
   "increase-lvl": {
@@ -209,12 +251,13 @@ const upgradeConfig = {
     costMultiplier: 2.0,
     lastPurchaseLevel: 0,
     apply() {
-      // Level up: increase bug spawn rate, etc.
+      // Level up
       gameLevel += 1;
-      bugSpawnIntervalMs = Math.max(500, Math.round(bugSpawnIntervalMs * 0.85));
-      restartBugSpawner();
 
-      // NEW: when we level up, re-evaluate what’s unlocked
+      // Recalculate spawn interval based on level
+      recalcBugSpawnInterval();
+
+      // Re-evaluate unlocks
       updateUpgradeAvailability();
       updateWeaponAvailability();
       updateAbilityAvailability();
@@ -385,9 +428,7 @@ function closeAbout() {
 // Show / hide Leaderboard
 function openLeaderboard() {
   if (leaderboardScreen) {
-    leaderboardScreen.addEventListener("click", (e) => {
-      if (e.target === leaderboardScreen) closeLeaderboard();
-    });
+    leaderboardScreen.classList.add("active");
   }
 }
 
@@ -405,9 +446,12 @@ if (closeLeaderboardBtn) {
   closeLeaderboardBtn.addEventListener("click", closeLeaderboard);
 }
 
-leaderboardScreen.addEventListener("click", (e) => {
-  if (e.target === leaderboardScreen) closeLeaderboard();
-});
+// click outside leaderboard panel to close
+if (leaderboardScreen) {
+  leaderboardScreen.addEventListener("click", (e) => {
+    if (e.target === leaderboardScreen) closeLeaderboard();
+  });
+}
 
 if (quitGameBtn) {
   quitGameBtn.addEventListener("click", () => {
@@ -447,6 +491,19 @@ window.powerupGeneration = window.powerupGeneration || 0;
 function resetGameProgress() {
   // Invalidate existing powerups (so expires don't mess with new state)
   window.powerupGeneration += 1;
+
+  // 🆕 Reset score submission state
+  scoreSubmittedForRun = false;
+  if (initialsInput) {
+    initialsInput.value = "";
+    initialsInput.disabled = false;
+  }
+  if (submitScoreButton) {
+    submitScoreButton.disabled = false;
+  }
+  if (submitMessage) {
+    submitMessage.textContent = "";
+  }
 
   // Clear bugs
   activeBugs.forEach(bug => bug.die());
@@ -665,34 +722,33 @@ function updateUpgradeAvailability() {
     } else {
       cost = cfg.cost;
       lastPurchaseLevel = cfg.lastPurchaseLevel;
-      // Global upgrades are not capped right now
     }
 
-    // Clear possible state classes first
     btn.classList.remove("locked", "maxed");
     btn.removeAttribute("title");
 
     if (isWeaponSpecificUpgrade(id) && isMaxed) {
-      // 🔹 MAXED state for this weapon
       btn.classList.add("maxed");
       btn.textContent = "MAXED";
-
       return;
     }
 
     const lockedByLevel = gameLevel < requiredLevel;
-    const alreadyBoughtThisLevel = (lastPurchaseLevel === gameLevel);
+
+    // 🔹 SPECIAL CASE: "increase-lvl" should NOT be locked by "alreadyBoughtThisLevel"
+    const alreadyBoughtThisLevel =
+      (id === "increase-lvl") ? false : (lastPurchaseLevel === gameLevel);
+
     const locked = lockedByLevel || alreadyBoughtThisLevel;
 
-    // Normal path: show cost text
     btn.textContent = `Upgrade: $${cost}`;
 
     if (locked) {
       btn.classList.add("locked");
       if (lockedByLevel) {
-
+        // optional tooltip text
       } else if (alreadyBoughtThisLevel) {
-
+        // optional tooltip text
       }
     }
   });
@@ -737,6 +793,7 @@ function handleUpgradeClick(id, buttonEl) {
   if (!cfg) return;
 
   const requiredLevel = cfg.requiredLevel || 1;
+  const isIncreaseLvl = (id === "increase-lvl");
 
   let cost;
   let lastPurchaseLevel;
@@ -759,7 +816,9 @@ function handleUpgradeClick(id, buttonEl) {
     lastPurchaseLevel = cfg.lastPurchaseLevel;
   }
 
-  const alreadyBoughtThisLevel = (lastPurchaseLevel === gameLevel);
+  // 🔹 SPECIAL CASE: increase-lvl should NOT be locked by "alreadyBoughtThisLevel"
+  const alreadyBoughtThisLevel =
+    isIncreaseLvl ? false : (lastPurchaseLevel === gameLevel);
 
   // 🔹 Hard lock conditions
   if (isWeaponSpecificUpgrade(id) && isMaxed) {
@@ -799,7 +858,7 @@ function handleUpgradeClick(id, buttonEl) {
     cfg.lastPurchaseLevel = gameLevel;
   }
 
-  // Refresh UI state (may now show MAXED)
+  // Refresh UI state (may now show MAXED / new costs)
   updateUpgradeAvailability();
 }
 
@@ -887,6 +946,53 @@ if (equipHammerBtn) {
     showWeaponTooltip("hammer", equipHammerBtn);
   });
   equipHammerBtn.addEventListener("mouseleave", hideWeaponTooltip);
+}
+
+if (submitScoreButton && initialsInput) {
+  submitScoreButton.addEventListener("click", async () => {
+    if (scoreSubmittedForRun) {
+      if (submitMessage) {
+        submitMessage.textContent = "Score already submitted for this run.";
+      }
+      return;
+    }
+
+    let initials = initialsInput.value.trim().toUpperCase();
+
+    // Exactly 3 alphanumeric characters
+    if (!/^[A-Z0-9]{3}$/.test(initials)) {
+      if (submitMessage) {
+        submitMessage.textContent = "Please enter exactly 3 letters or numbers.";
+      }
+      return;
+    }
+
+    if (typeof window.submitScoreToLeaderboard !== "function") {
+      if (submitMessage) {
+        submitMessage.textContent = "Score system not available.";
+      }
+      return;
+    }
+
+    try {
+      // Use bugScoreTotal as the final score
+      await window.submitScoreToLeaderboard(initials, bugScoreTotal);
+
+      scoreSubmittedForRun = true;
+
+      if (submitMessage) {
+        submitMessage.textContent = "Score submitted! Check the leaderboard 🏆";
+      }
+
+      submitScoreButton.disabled = true;
+      initialsInput.disabled = true;
+    } catch (err) {
+      console.error(err);
+      if (submitMessage) {
+        submitMessage.textContent = "Error submitting score. Please try again.";
+      }
+    }
+  });
 }
 
 // Allow clicking outside panel to close
@@ -998,9 +1104,7 @@ if (playArea && swatter) {
   });
 
   playArea.addEventListener("mousemove", (event) => {
-    // Use element-relative coordinates, same as handleSwat()
-    const baseX = event.offsetX;
-    const baseY = event.offsetY;
+    const { x: baseX, y: baseY } = getPlayAreaCoordsFromEvent(event);
 
     const offsetX = currentWeapon?.cursorOffsetX ?? 0;
     const offsetY = currentWeapon?.cursorOffsetY ?? 0;
@@ -1031,8 +1135,7 @@ if (playArea && swatter) {
 function handleSwat(event) {
   if (!playArea || !currentWeapon) return;
 
-  const hitX = event.offsetX;
-  const hitY = event.offsetY;
+  const { x: hitX, y: hitY } = getPlayAreaCoordsFromEvent(event);
 
   // Try attack (respects cooldown)
   const {
@@ -1044,6 +1147,11 @@ function handleSwat(event) {
 
   if (!didAttack) {
     return;
+  }
+
+  // Spawn a cosmetic melee hit marker, scaled by weapon's hitRadius
+  if (typeof MeleeHitProjectile === "function") {
+    new MeleeHitProjectile(playArea, hitX, hitY, currentWeapon.hitRadius);
   }
 
   // Swat animation ONLY if we actually swung
@@ -1087,18 +1195,46 @@ function addBugToGame(bug) {
   updateBugMeter(bug.score || 0);
 }
 
+function getBossThresholdForLevel() {
+  const lvl = gameLevel || 1;
+  const raw = BASE_BOSS_THRESHOLD - (lvl - 1) * BOSS_THRESHOLD_STEP_PER_LEVEL;
+  return Math.max(MIN_BOSS_THRESHOLD, raw);
+}
+
 function spawnRandomBug() {
   if (!playArea) return;
 
   const r = Math.random();
+  const n = Math.random();
   let bug;
 
-  if (r < 0.7) {
+  // Dynamic boss threshold based on gameLevel
+  const bossThreshold = getBossThresholdForLevel();
+  // At LVL 1: bossThreshold = 0.95
+  // At LVL 2: bossThreshold = 0.94
+  // ...
+  // At high LVL: clamps at MIN_BOSS_THRESHOLD (e.g. 0.80)
+
+  // Spawn distribution (using dynamic bossThreshold):
+  //  0.00–0.45              Ant
+  //  0.45–0.75              Fly
+  //  0.75–bossThreshold     Roach
+  //  bossThreshold–1.00     Boss (Spider/Wasp/Beetle)
+  if (r < 0.45) {
     bug = new AntBug(playArea);
-  } else if (r < 0.95) {
+  } else if (r < 0.75) {
+    bug = new FlyBug(playArea);
+  } else if (r < bossThreshold) {
     bug = new RoachBug(playArea);
   } else {
-    bug = new SpiderBug(playArea);
+    // Boss selection: evenly split between big bugs
+    if (n < 0.33) {
+      bug = new SpiderBug(playArea);
+    } else if (n < 0.66) {
+      bug = new WaspBug(playArea);
+    } else {
+      bug = new BeetleBug(playArea);
+    }
   }
 
   addBugToGame(bug);
