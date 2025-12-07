@@ -280,8 +280,8 @@ class AntBug extends BaseBug {
 class FlyBug extends BaseBug {
   constructor(playArea) {
     super(playArea, {
-      hp: 5,                      // same HP as ant
-      speed: 2.8,                 // faster than ant (2.0)
+      hp: 5,                      
+      speed: 2.8,                 
       size: 28,
       spriteWidth: 20,
       spriteHeight: 20,
@@ -372,7 +372,7 @@ class SpiderBug extends BaseBug {
       hp: 30,
       speed: 4.0,
       size: 48,
-      spriteWidth: 48,
+      spriteWidth: 58,
       spriteHeight: 64,
       img: "../IMG/bugs/spider/spiderBase.png",
       
@@ -416,9 +416,9 @@ class WaspBug extends BaseBug {
     super(playArea, {
       hp: 30,                     // tougher than fly/roach
       speed: 4.2,                 // quite fast
-      size: 70,
-      spriteWidth: 24,
-      spriteHeight: 28,
+      size: 48,
+      spriteWidth: 60,
+      spriteHeight: 64,
 
       walkFrames: [
         "../IMG/bugs/wasp/waspBack.png",
@@ -449,9 +449,9 @@ class BeetleBug extends BaseBug {
     super(playArea, {
       hp: 100,                    // toughest bug in the roster
       speed: 1.0,                 // slowest of all
-      size: 180,
-      spriteWidth: 40,
-      spriteHeight: 48,
+      size: 220,
+      spriteWidth: 72,
+      spriteHeight: 78,
 
       walkFrames: [
         "../IMG/bugs/beetle/beetleBack.png",

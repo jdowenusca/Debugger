@@ -95,7 +95,7 @@ class SwatterWeapon extends BaseWeapon {
       cursorOffsetX: -25,
       cursorOffsetY: -30,
       cooldownMs: 600, // 0.5 seconds between swings
-      description: "Tried and true classic for bug extermination. "
+      description: "Tried and true classic for therapeutic DeBugging. "
     });
   }
 }
@@ -105,7 +105,7 @@ class HammerWeapon extends BaseWeapon {
   constructor() {
     super({
       name: "Bug Hammer",
-      damage: 5,
+      damage: 7,
       hitRadius: 55,
       cursorSprite: "../IMG/weapons/hammer/hammer.png",
       cursorWidth: 90,
@@ -113,7 +113,7 @@ class HammerWeapon extends BaseWeapon {
       cursorOffsetX: -15,
       cursorOffsetY: -10,
       cooldownMs: 1400, // slower but stronger
-      description: "A heavy hammer for heavy duty DeBugging. Slow, but reliable."
+      description: "A heavy hammer for heavy duty DeBugging. Slow, but reliable, and offering an additional +30% per Upgrade RAD."
     });
   }
 }

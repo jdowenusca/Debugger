@@ -55,7 +55,7 @@ const bugsKilledDisplay = document.getElementById("bugs-killed-value");
 const scoreDisplay = document.getElementById("score-value");
 const buggedScoreDisplay = document.getElementById("bugged-score-value");
 
-const BUG_METER_MAX = 100;                    // max bug meter value
+const BASE_BUG_METER_MAX = 100;               // max bug meter value
 const BASE_BUG_SPAWN_INTERVAL = 3000;         // ms at LVL 1
 const MIN_BUG_SPAWN_INTERVAL = 500;           // absolute minimum so engine doesn't explode
 const BUG_SPAWN_DECREASE_PER_LEVEL = 250;     // ms removed per level
@@ -136,6 +136,7 @@ const abilityLevelRequirements = {
 
 // Global game state variables
 
+let bugMeterMax = BASE_BUG_METER_MAX;
 let bugMeterValue = 0;
 let bugScoreTotal = 0; // for future "Score" display
 var isPaused = true;       // Game starts paused!
@@ -199,7 +200,13 @@ const upgradeConfig = {
     lastPurchaseLevel: 0,
     apply() {
       if (!currentWeapon) return;
-      currentWeapon.hitRadius += 5; // +5 px radius per level
+      const baseIncrease = 5; // what other weapons get
+      let multiplier = 1;
+      // Give the hammer a slightly stronger radius boost
+      if (currentWeapon instanceof HammerWeapon) {
+        multiplier = 1.3; // tweak this number to taste (1.2, 1.5, etc.)
+      }
+      currentWeapon.hitRadius += baseIncrease * multiplier;
     }
   },
   "decrease-wcd": {
@@ -253,6 +260,10 @@ const upgradeConfig = {
     apply() {
       // Level up
       gameLevel += 1;
+
+      // Give the player more bug meter capacity each level (tweak 20 as you like)
+      bugMeterMax += 20;
+      refreshBugMeterUI(); // update the bar to reflect the new max
 
       // Recalculate spawn interval based on level
       recalcBugSpawnInterval();
@@ -524,6 +535,7 @@ function resetGameProgress() {
   updateStatsUI();
 
   // Reset Bug Meter
+  bugMeterMax = BASE_BUG_METER_MAX;
   bugMeterValue = 0;
   refreshBugMeterUI();
 
@@ -674,7 +686,6 @@ function activatePowerup(entry) {
   powerupInstance.activate();
 }
 
-
 // -------------------------------
 //  UPDATING AVAILABILITY LOGIC
 // ------------------------------
@@ -685,6 +696,7 @@ upgradeButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     const id = btn.dataset.upgradeId;
     handleUpgradeClick(id, btn);
+    console.log('Current bug meter max:' + bugMeterMax);
   });
 });
 
@@ -1255,16 +1267,16 @@ function restartBugSpawner() {
 
 function refreshBugMeterUI() {
   if (!bugMeterFill) return;
-  const pct = Math.max(0, Math.min(1, bugMeterValue / BUG_METER_MAX));
+  const pct = Math.max(0, Math.min(1, bugMeterValue / bugMeterMax));
   bugMeterFill.style.width = (pct * 100) + "%";
 }
 
 function updateBugMeter(delta) {
   bugMeterValue += delta;
-  bugMeterValue = Math.max(0, Math.min(BUG_METER_MAX, bugMeterValue));
+  bugMeterValue = Math.max(0, Math.min(bugMeterMax, bugMeterValue));
   refreshBugMeterUI();
 
-  if (bugMeterValue >= BUG_METER_MAX) {
+  if (bugMeterValue >= bugMeterMax) {
     triggerBuggedGameOver();
   }
 }
