@@ -272,26 +272,26 @@
   <div id="journal-screen" class="overlay-panel">
     <div class="panel-content">
       <h2>Journal</h2>
-      <p>Here you’ll eventually see entries about:</p>
+      <p>Here you'll eventually see entries about:</p>
       <ul>
-        <li>Bugs you’ve discovered</li>
-        <li>Weapons you’ve unlocked</li>
+        <li>Bugs you've discovered</li>
+        <li>Weapons you've unlocked</li>
         <li>Upgrades and milestones</li>
       </ul>
 
       <section class="journal-section">
         <h3>Bug Log (Placeholder)</h3>
-        <p>🪰 Example Bug: “Common Housefly” – weak, appears early, low reward.</p>
+        <p>🪰 Example Bug: “Common Housefly” - weak, appears early, low reward.</p>
       </section>
 
       <section class="journal-section">
         <h3>Weapons (Placeholder)</h3>
-        <p>🧹 Basic Swatter – your starting weapon. Reliable, but basic.</p>
+        <p>🧹 Basic Swatter - your starting weapon. Reliable, but basic.</p>
       </section>
 
       <section class="journal-section">
         <h3>Upgrades (Placeholder)</h3>
-        <p>⬆️ Damage Boost I – increases damage by 10%.</p>
+        <p>⬆️ Damage Boost I - increases damage by 10%.</p>
       </section>
 
       <button class="close-btn" id="close-journal">Close</button>
@@ -337,6 +337,13 @@
         <input type="range" id="sfx-volume" min="0" max="100" value="80">
       </div>
 
+      <div class="option-row">
+        <label>
+          <input type="checkbox" id="spacebar-click-toggle">
+          Spacebar for Click
+        </label>
+      </div>
+
       <p class="option-note">(Sliders are visual for now — we’ll hook them to real audio later.)</p>
 
       <button class="close-btn" id="close-options">Close</button>
@@ -351,6 +358,9 @@
       <div class="pause-buttons">
         <button id="btn-rebug" class="overlay-button">
           <img src="../IMG/menu/Rebug.png" alt="Rebug" class="overlay-button-img">
+        </button>
+        <button id="btn-pause-options" class="overlay-button">
+          <img src="../IMG/menu/Options.png" alt="Options" class="overlay-button-img">
         </button>
         <!--<button id="btn-pause-journal" class="overlay-button">
           <img src="../IMG/menu/Journal.png" alt="" class="overlay-button-img">
@@ -429,115 +439,115 @@
 
   <!-- Firebase Database -->
   <script type="module">
-  import {
-    initializeApp
-  } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js';
+    import {
+      initializeApp
+    } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js';
 
-  import {
-    getFirestore,
-    onSnapshot,
-    collection,
-    query,
-    orderBy,
-    limit,
-    addDoc
-  } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js';
+    import {
+      getFirestore,
+      onSnapshot,
+      collection,
+      query,
+      orderBy,
+      limit,
+      addDoc
+    } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js';
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCj56GT533SFfRFZUfZ3ZTrBMVVQBPsrcw",
-    authDomain: "owendatabase2025.firebaseapp.com",
-    projectId: "owendatabase2025",
-    storageBucket: "owendatabase2025.firebasestorage.app",
-    messagingSenderId: "255375433561",
-    appId: "1:255375433561:web:2c88349ef48e8493fef648",
-    measurementId: "G-TSJTVN6ZBP"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyCj56GT533SFfRFZUfZ3ZTrBMVVQBPsrcw",
+      authDomain: "owendatabase2025.firebaseapp.com",
+      projectId: "owendatabase2025",
+      storageBucket: "owendatabase2025.firebasestorage.app",
+      messagingSenderId: "255375433561",
+      appId: "1:255375433561:web:2c88349ef48e8493fef648",
+      measurementId: "G-TSJTVN6ZBP"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const quancollection = collection(db, "DeBugger");
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const quancollection = collection(db, "DeBugger");
 
-  // 🔹 Expose a global function so game.js can call it
-  window.submitScoreToLeaderboard = async function (name, score) {
-    try {
-      await addDoc(quancollection, {
-        name,
-        score
+    // 🔹 Expose a global function so game.js can call it
+    window.submitScoreToLeaderboard = async function (name, score) {
+      try {
+        await addDoc(quancollection, {
+          name,
+          score
+        });
+        console.log("Score submitted:", name, score);
+      } catch (err) {
+        console.error("Error submitting score:", err);
+        throw err;
+      }
+    };
+
+    // 🔹 Listen for top 10 changes and update the leaderboard table
+    const q = query(quancollection, orderBy("score", "desc"), limit(10));
+
+    onSnapshot(q, (querySnapshot) => {
+      const leaderboard = [];
+      querySnapshot.forEach((doc) => {
+        leaderboard.push(doc.data());
       });
-      console.log("Score submitted:", name, score);
-    } catch (err) {
-      console.error("Error submitting score:", err);
-      throw err;
-    }
-  };
 
-  // 🔹 Listen for top 10 changes and update the leaderboard table
-  const q = query(quancollection, orderBy("score", "desc"), limit(10));
+      console.log("Current leaderboard: ", leaderboard);
 
-  onSnapshot(q, (querySnapshot) => {
-    const leaderboard = [];
-    querySnapshot.forEach((doc) => {
-      leaderboard.push(doc.data());
+      const tbody = document.querySelector("#leaderboard-list tbody");
+      if (!tbody) return;
+
+      // Clear existing rows
+      tbody.innerHTML = "";
+
+      // Build rows from Firestore data
+      leaderboard.forEach((entry, index) => {
+        const rank = index + 1;
+        const name = entry.name ?? "Unknown";
+        const score = entry.score ?? 0;
+
+        const tr = document.createElement("tr");
+
+        // Rank-based highlight (gold/silver/bronze)
+        if (rank === 1) tr.classList.add("rank-gold");
+        else if (rank === 2) tr.classList.add("rank-silver");
+        else if (rank === 3) tr.classList.add("rank-bronze");
+
+        const rankTd = document.createElement("td");
+        rankTd.textContent = rank;
+
+        const nameTd = document.createElement("td");
+        nameTd.textContent = name;
+
+        const scoreTd = document.createElement("td");
+        scoreTd.textContent = score;
+
+        tr.appendChild(rankTd);
+        tr.appendChild(nameTd);
+        tr.appendChild(scoreTd);
+
+        tbody.appendChild(tr);
+      });
+
+      // Optional: pad up to 10 rows
+      for (let i = leaderboard.length; i < 10; i++) {
+        const tr = document.createElement("tr");
+
+        const rankTd = document.createElement("td");
+        rankTd.textContent = i + 1;
+
+        const nameTd = document.createElement("td");
+        nameTd.textContent = "-";
+
+        const scoreTd = document.createElement("td");
+        scoreTd.textContent = "-";
+
+        tr.appendChild(rankTd);
+        tr.appendChild(nameTd);
+        tr.appendChild(scoreTd);
+
+        tbody.appendChild(tr);
+      }
     });
-
-    console.log("Current leaderboard: ", leaderboard);
-
-    const tbody = document.querySelector("#leaderboard-list tbody");
-    if (!tbody) return;
-
-    // Clear existing rows
-    tbody.innerHTML = "";
-
-    // Build rows from Firestore data
-    leaderboard.forEach((entry, index) => {
-      const rank = index + 1;
-      const name = entry.name ?? "Unknown";
-      const score = entry.score ?? 0;
-
-      const tr = document.createElement("tr");
-
-      // Rank-based highlight (gold/silver/bronze)
-      if (rank === 1) tr.classList.add("rank-gold");
-      else if (rank === 2) tr.classList.add("rank-silver");
-      else if (rank === 3) tr.classList.add("rank-bronze");
-
-      const rankTd = document.createElement("td");
-      rankTd.textContent = rank;
-
-      const nameTd = document.createElement("td");
-      nameTd.textContent = name;
-
-      const scoreTd = document.createElement("td");
-      scoreTd.textContent = score;
-
-      tr.appendChild(rankTd);
-      tr.appendChild(nameTd);
-      tr.appendChild(scoreTd);
-
-      tbody.appendChild(tr);
-    });
-
-    // Optional: pad up to 10 rows
-    for (let i = leaderboard.length; i < 10; i++) {
-      const tr = document.createElement("tr");
-
-      const rankTd = document.createElement("td");
-      rankTd.textContent = i + 1;
-
-      const nameTd = document.createElement("td");
-      nameTd.textContent = "-";
-
-      const scoreTd = document.createElement("td");
-      scoreTd.textContent = "-";
-
-      tr.appendChild(rankTd);
-      tr.appendChild(nameTd);
-      tr.appendChild(scoreTd);
-
-      tbody.appendChild(tr);
-    }
-  });
-</script>
+  </script>
 
 </body>
 

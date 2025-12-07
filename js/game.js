@@ -19,6 +19,7 @@ const btnJournal = document.getElementById("btn-journal");
 const btnOptions = document.getElementById("btn-options");
 const btnAbout = document.getElementById("btn-about");
 const btnLeaderboard = document.getElementById("btn-leaderboard");
+const btnPauseOptions = document.getElementById("btn-pause-options");
 
 const journalScreen = document.getElementById("journal-screen");
 const optionsScreen = document.getElementById("options-screen");
@@ -134,8 +135,18 @@ const abilityLevelRequirements = {
   "slapshot": 12,
 };
 
-// Global game state variables
+// Toggle spacebar logic
+const spacebarToggle = document.getElementById("spacebar-click-toggle");
+if (spacebarToggle) {
+  spacebarToggle.addEventListener("change", () => {
+    spacebarClickEnabled = spacebarToggle.checked;
+  });
+}
 
+// Global game state variables
+let spacebarClickEnabled = false;
+let lastCursorX = null;
+let lastCursorY = null;
 let bugMeterMax = BASE_BUG_METER_MAX;
 let bugMeterValue = 0;
 let bugScoreTotal = 0; // for future "Score" display
@@ -149,6 +160,7 @@ let bugsKilled = 0;
 let bugSpawnIntervalMs = 3000;
 let bugSpawnTimerId = null;
 let journalOpenedFromPause = false;
+let optionsOpenedFromPause = false;
 let scoreSubmittedForRun = false;
 
 // Weapon inventory
@@ -421,7 +433,14 @@ function closeOptions() {
   if (optionsScreen) {
     optionsScreen.classList.remove("active");
   }
+  // If we opened from pause, return to pause screen
+  if (optionsOpenedFromPause && pauseScreen) {
+    pauseScreen.classList.add("active");
+  }
+  optionsOpenedFromPause = false;
 }
+
+
 
 // Show / hide About DeBugger
 function openAbout() {
@@ -482,6 +501,16 @@ function quitGameCompletely() {
       <p>You may close this tab now.</p>
     </div>
   `;
+}
+
+if (btnPauseOptions) {
+  btnPauseOptions.addEventListener("click", () => {
+    optionsOpenedFromPause = true;
+    if (pauseScreen) {
+      pauseScreen.classList.remove("active");
+    }
+    openOptions();
+  });
 }
 
 // ------------------
@@ -1023,6 +1052,13 @@ if (submitScoreButton && initialsInput) {
           pauseScreen.classList.add("active");
         }
       }
+
+      if (overlay === optionsScreen) {
+        if (optionsOpenedFromPause && pauseScreen) {
+          pauseScreen.classList.add("active");
+        }
+        optionsOpenedFromPause = false;
+      }
     }
   });
 });
@@ -1046,25 +1082,20 @@ function resumeGame() {
 }
 
 function quitToTitle() {
-  // Close all overlays
-  if (pauseScreen) pauseScreen.classList.remove("active");
-  if (journalScreen) journalScreen.classList.remove("active");
-  if (optionsScreen) optionsScreen.classList.remove("active");
+  // Fully reset game state (money, score, bugs, level, upgrades, meter, etc.)
+  resetGameProgress();
 
-  // Reset flags
+  // Flags
   isPaused = true;
   window.isPaused = true;
   gameStarted = false;
 
-  // Clear bugs
-  activeBugs.forEach(bug => bug.die());
-  activeBugs = [];
-  window.activeBugs = activeBugs;
-
-  // Reset stats
-  money = 0;
-  bugsKilled = 0;
-  updateStatsUI();
+  // Close overlays
+  if (pauseScreen) pauseScreen.classList.remove("active");
+  if (journalScreen) journalScreen.classList.remove("active");
+  if (optionsScreen) optionsScreen.classList.remove("active");
+  if (aboutScreen) aboutScreen.classList.remove("active");
+  if (leaderboardScreen) leaderboardScreen.classList.remove("active");
 
   // Hide game
   if (gameContainer) {
@@ -1076,7 +1107,7 @@ function quitToTitle() {
     titleScreen.classList.remove("background-mode");
   }
 
-  // 🔹 Unblur the global background
+  // Unblur global background
   document.body.classList.remove("game-active");
 }
 
@@ -1115,8 +1146,12 @@ if (playArea && swatter) {
     swatter.style.display = "block";
   });
 
-  playArea.addEventListener("mousemove", (event) => {
+    playArea.addEventListener("mousemove", (event) => {
     const { x: baseX, y: baseY } = getPlayAreaCoordsFromEvent(event);
+
+    // Remember last cursor position in play area coordinates
+    lastCursorX = baseX;
+    lastCursorY = baseY;
 
     const offsetX = currentWeapon?.cursorOffsetX ?? 0;
     const offsetY = currentWeapon?.cursorOffsetY ?? 0;
@@ -1144,15 +1179,12 @@ if (playArea && swatter) {
 }
 
 
-function handleSwat(event) {
+function handleSwatAt(hitX, hitY) {
   if (!playArea || !currentWeapon) return;
 
-  const { x: hitX, y: hitY } = getPlayAreaCoordsFromEvent(event);
-
-  // Try attack (respects cooldown)
   const {
     didAttack,
-    moneyGained,
+    moneyGained,           // now always 0; rewards handled on bug death
     bugsKilled: kills,
     killedBugCenters
   } = currentWeapon.tryAttack(hitX, hitY, activeBugs);
@@ -1161,12 +1193,7 @@ function handleSwat(event) {
     return;
   }
 
-  // Spawn a cosmetic melee hit marker, scaled by weapon's hitRadius
-  if (typeof MeleeHitProjectile === "function") {
-    new MeleeHitProjectile(playArea, hitX, hitY, currentWeapon.hitRadius);
-  }
-
-  // Swat animation ONLY if we actually swung
+  // Swat animation
   if (swatter) {
     swatter.classList.add("swat");
     setTimeout(() => {
@@ -1174,18 +1201,10 @@ function handleSwat(event) {
     }, 80);
   }
 
-  if (moneyGained > 0 || kills > 0) {
-    money += moneyGained * window.moneyMultiplier;
-    bugsKilled += kills;
-    updateStatsUI();
-  }
-
-  // Powerup drop logic
+  // Powerup drop logic stays
   if (kills > 0 && killedBugCenters.length > 0) {
-    // Roll chance that ANY powerup drops
     if (Math.random() < overallPowerupDropChance) {
       const entry = pickWeightedPowerupEntry();
-      // Pick one of the killed bugs at random
       const chosenCenter =
         killedBugCenters[Math.floor(Math.random() * killedBugCenters.length)];
       spawnPowerupPickup(entry, chosenCenter.cx, chosenCenter.cy);
@@ -1194,7 +1213,13 @@ function handleSwat(event) {
 
   // Clean out dead bugs
   activeBugs = activeBugs.filter((b) => !b.isDead);
-  window.activeBugs = activeBugs; // keep BBB etc. in sync
+  window.activeBugs = activeBugs;
+}
+
+function handleSwat(event) {
+  if (!playArea || !currentWeapon) return;
+  const { x: hitX, y: hitY } = getPlayAreaCoordsFromEvent(event);
+  handleSwatAt(hitX, hitY);
 }
 
 // ----------------------
@@ -1284,8 +1309,19 @@ function updateBugMeter(delta) {
 // Called from BaseBug.die() via window hook
 window.updateBugMeterFromBugDeath = function (bug) {
   const s = bug.score || 0;
+  const reward = bug.reward || 0;
+
+  // Bug Meter + Score
   updateBugMeter(-s);
-  bugScoreTotal += s; // we'll display this later as Score
+  bugScoreTotal += s;
+
+  // Money + Kill Count
+  const multiplier = (window.moneyMultiplier === undefined) ? 1 : window.moneyMultiplier;
+  money += reward * multiplier;
+  bugsKilled += 1;
+
+  // Refresh HUD
+  updateStatsUI();
 };
 
 // ----------------------
@@ -1449,6 +1485,21 @@ abilityButtons.forEach((btn) => {
     // TODO: hook this into real ability logic when you're ready
     // activateAbility(id);
   });
+});
+
+document.addEventListener("keydown", (event) => {
+  if (!spacebarClickEnabled) return;
+
+  // Spacebar
+  if (event.code === "Space" || event.key === " ") {
+    event.preventDefault();
+
+    if (!gameStarted || isPaused) return;
+    if (!playArea) return;
+    if (lastCursorX == null || lastCursorY == null) return;
+
+    handleSwatAt(lastCursorX, lastCursorY);
+  }
 });
 
 //-------------------------------------

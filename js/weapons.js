@@ -55,9 +55,8 @@ class BaseWeapon {
   }
 
   attack(hitX, hitY, bugs) {
-    let moneyGained = 0;
     let bugsKilled = 0;
-    const killedBugCenters = []; // NEW: track where killed bugs were
+    const killedBugCenters = [];
 
     bugs.forEach((bug) => {
       if (bug.isDead) return;
@@ -72,15 +71,16 @@ class BaseWeapon {
         bug.takeDamage(this.damage);
 
         if (wasAlive && bug.isDead) {
-          moneyGained += bug.reward;
           bugsKilled += 1;
-          // Save the position where this bug died
           killedBugCenters.push({ cx, cy });
         }
       }
-  });
-    return { moneyGained, bugsKilled, killedBugCenters };
+    });
+
+    // moneyGained now always 0; rewards handled on bug death globally
+    return { moneyGained: 0, bugsKilled, killedBugCenters };
   }
+
 }
 
 // Swatter
@@ -88,7 +88,7 @@ class SwatterWeapon extends BaseWeapon {
   constructor() {
     super({
       name: "Bug Swatter",
-      damage: 1,       
+      damage: 1,
       hitRadius: 30,
       cursorSprite: "../IMG/weapons/swatter/swatter.png",
       cursorWidth: 50,
