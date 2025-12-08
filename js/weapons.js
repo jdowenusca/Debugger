@@ -19,6 +19,8 @@ class BaseWeapon {
     this.damage = damage;
     this.hitRadius = hitRadius;
 
+    this.isRanged = false; //melee by default
+
     this.cursorSprite = cursorSprite;
     this.cursorWidth = cursorWidth;
     this.cursorHeight = cursorHeight;
@@ -148,8 +150,8 @@ class BugZapperWeapon extends BaseWeapon {
       cursorHeight: 32,
       cursorOffsetX: -16,
       cursorOffsetY: -16,
-      cooldownMs: 450,    // fire rate
-      description: ""
+      cooldownMs: 1000,    // fire rate
+      description: "An energy based DeBugging tool, perfect for those looking to strike down bugs with thunderous glee. WARNING: Lightning prone to periodic jumping."
     });
 
     // flag for ranged vs melee

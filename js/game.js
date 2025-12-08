@@ -47,9 +47,11 @@ const submitMessage = document.getElementById("submit-message");
 
 const equipSwatterBtn = document.getElementById("equip-swatter");
 const equipHammerBtn = document.getElementById("equip-hammer");
+const equipBugZapperBtn = document.getElementById("equip-bugzapper");
 //more weapons here later
 const weaponPanel = document.getElementById("weapon-panel");
 const weaponTooltip = document.getElementById("weapon-tooltip");
+const bugZapperBase = document.getElementById("bugzapper-base");
 
 const moneyDisplay = document.getElementById("money-value");
 const bugsKilledDisplay = document.getElementById("bugs-killed-value");
@@ -167,6 +169,7 @@ let scoreSubmittedForRun = false;
 const weaponInventory = {
   swatter: new SwatterWeapon(),
   hammer: new HammerWeapon(),
+  bugzapper: new BugZapperWeapon(),
   // add more weapons here later
 };
 let currentWeapon = weaponInventory.swatter;
@@ -174,7 +177,8 @@ let currentWeaponKey = "swatter";
 
 const weaponUnlockLevel = {
   swatter: 1,
-  hammer: 3,
+  hammer: 1,
+  bugzapper: 1,
   // add more weapons and their unlock levels here
 }
 
@@ -369,22 +373,32 @@ function updateStatsUI() {
 function applyWeaponCursor() {
   if (!swatter || !currentWeapon) return;
 
+  // Cursor marker
   swatter.src = currentWeapon.cursorSprite;
-
   swatter.style.width = currentWeapon.cursorWidth + "px";
 
   if (currentWeapon.cursorHeight) {
     swatter.style.height = currentWeapon.cursorHeight + "px";
   } else {
-    swatter.style.height = "auto"; // auto-scale by width
+    swatter.style.height = currentWeapon.cursorWidth + "px"; // keep it roughly square
+  }
+
+  // Bug Zapper base visibility
+  if (bugZapperBase) {
+    if (currentWeapon.isRanged) {
+      bugZapperBase.style.display = "block";
+    } else {
+      bugZapperBase.style.display = "none";
+    }
   }
 }
 
 function setWeaponButtonActive(which) {
-  if (!equipSwatterBtn || !equipHammerBtn) return;
+  if (!equipSwatterBtn || !equipHammerBtn || !equipBugZapperBtn) return;
 
   equipSwatterBtn.classList.toggle("active", which === "swatter");
   equipHammerBtn.classList.toggle("active", which === "hammer");
+  equipBugZapperBtn.classList.toggle("active", which === "bugzapper");
 }
 
 
@@ -810,6 +824,14 @@ function updateWeaponAvailability() {
       ? `Increase LVL to Unlock (requires LVL ${weaponUnlockLevel.hammer})`
       : "Bug Hammer";
   }
+
+  if (equipBugZapperBtn) {
+    const locked = gameLevel < weaponUnlockLevel.bugzapper;
+    equipBugZapperBtn.classList.toggle("locked", locked);
+    equipBugZapperBtn.title = locked
+      ? `Increase LVL to Unlock (requires LVL ${weaponUnlockLevel.bugzapper})`
+      : "Bug Zapper";
+  }
 }
 
 function updateAbilityAvailability() {
@@ -938,54 +960,6 @@ if (closeOptionsBtn) {
 
 if (closeAboutBtn) {
   closeAboutBtn.addEventListener("click", closeAbout);
-}
-
-if (equipSwatterBtn) {
-  equipSwatterBtn.addEventListener("click", () => {
-    if (gameLevel < weaponUnlockLevel.swatter) {
-      equipSwatterBtn.classList.add("locked-pulse");
-      setTimeout(() => equipSwatterBtn.classList.remove("locked-pulse"), 150);
-      return;
-    }
-    equipSwatter();
-    setWeaponButtonActive("swatter");
-  });
-
-  equipSwatterBtn.addEventListener("mouseenter", () => {
-    showWeaponTooltip("swatter", equipSwatterBtn);
-  });
-  equipSwatterBtn.addEventListener("mouseleave", hideWeaponTooltip);
-}
-
-if (equipSwatterBtn) {
-  equipSwatterBtn.addEventListener("mouseenter", () => {
-    showWeaponTooltip("swatter", equipSwatterBtn);
-  });
-  equipSwatterBtn.addEventListener("mouseleave", hideWeaponTooltip);
-}
-
-if (equipHammerBtn) {
-  equipHammerBtn.addEventListener("click", () => {
-    if (gameLevel < weaponUnlockLevel.hammer) {
-      equipHammerBtn.classList.add("locked-pulse");
-      setTimeout(() => equipHammerBtn.classList.remove("locked-pulse"), 150);
-      return;
-    }
-    equipHammer();
-    setWeaponButtonActive("hammer");
-  });
-
-  equipHammerBtn.addEventListener("mouseenter", () => {
-    showWeaponTooltip("hammer", equipHammerBtn);
-  });
-  equipHammerBtn.addEventListener("mouseleave", hideWeaponTooltip);
-}
-
-if (equipHammerBtn) {
-  equipHammerBtn.addEventListener("mouseenter", () => {
-    showWeaponTooltip("hammer", equipHammerBtn);
-  });
-  equipHammerBtn.addEventListener("mouseleave", hideWeaponTooltip);
 }
 
 if (submitScoreButton && initialsInput) {
@@ -1145,7 +1119,7 @@ if (playArea && swatter) {
     swatter.style.display = "block";
   });
 
-    playArea.addEventListener("mousemove", (event) => {
+  playArea.addEventListener("mousemove", (event) => {
     const { x: baseX, y: baseY } = getPlayAreaCoordsFromEvent(event);
 
     // Remember last cursor position in play area coordinates
@@ -1155,8 +1129,25 @@ if (playArea && swatter) {
     const offsetX = currentWeapon?.cursorOffsetX ?? 0;
     const offsetY = currentWeapon?.cursorOffsetY ?? 0;
 
-    swatter.style.left = baseX + offsetX + "px";
-    swatter.style.top = baseY + offsetY + "px";
+    // Cursor marker always follows the mouse (melee or ranged).
+    if (swatter) {
+      swatter.style.left = baseX + offsetX + "px";
+      swatter.style.top = baseY + offsetY + "px";
+    }
+
+    // If Bug Zapper (or any ranged weapon with isRanged=true), rotate the base to face the cursor.
+    if (bugZapperBase && currentWeapon && currentWeapon.isRanged) {
+      const rect = playArea.getBoundingClientRect();
+      const weaponX = rect.width / 2;
+      const weaponY = rect.height; // bottom-center
+
+      const dx = baseX - weaponX;
+      const dy = baseY - weaponY;
+      const angleDeg = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+
+      bugZapperBase.style.transform =
+        `translate(-50%, 0) rotate(${angleDeg}deg)`;
+    }
   });
 
   playArea.addEventListener("mouseleave", () => {
@@ -1192,8 +1183,8 @@ function handleSwatAt(hitX, hitY) {
     return;
   }
 
-  // Spawn melee-hit projectile centered on the hit
-  if (typeof MeleeHitProjectile === "function") {
+  // 🔹 Spawn melee-hit projectile ONLY for melee weapons
+  if (!currentWeapon.isRanged && typeof MeleeHitProjectile === "function") {
     new MeleeHitProjectile(playArea, hitX, hitY, currentWeapon.hitRadius);
   }
 
@@ -1340,11 +1331,83 @@ function equipSwatter() {
   updateUpgradeAvailability();
 }
 
+if (equipSwatterBtn) {
+  equipSwatterBtn.addEventListener("click", () => {
+    if (gameLevel < weaponUnlockLevel.swatter) {
+      equipSwatterBtn.classList.add("locked-pulse");
+      setTimeout(() => equipSwatterBtn.classList.remove("locked-pulse"), 150);
+      return;
+    }
+    equipSwatter();
+    setWeaponButtonActive("swatter");
+  });
+
+  equipSwatterBtn.addEventListener("mouseenter", () => {
+    showWeaponTooltip("swatter", equipSwatterBtn);
+  });
+  equipSwatterBtn.addEventListener("mouseleave", hideWeaponTooltip);
+}
+
+if (equipSwatterBtn) {
+  equipSwatterBtn.addEventListener("mouseenter", () => {
+    showWeaponTooltip("swatter", equipSwatterBtn);
+  });
+  equipSwatterBtn.addEventListener("mouseleave", hideWeaponTooltip);
+}
+
 function equipHammer() {
   currentWeapon = weaponInventory.hammer;
   currentWeaponKey = "hammer";
   applyWeaponCursor();
   updateUpgradeAvailability();
+}
+
+if (equipHammerBtn) {
+  equipHammerBtn.addEventListener("click", () => {
+    if (gameLevel < weaponUnlockLevel.hammer) {
+      equipHammerBtn.classList.add("locked-pulse");
+      setTimeout(() => equipHammerBtn.classList.remove("locked-pulse"), 150);
+      return;
+    }
+    equipHammer();
+    setWeaponButtonActive("hammer");
+  });
+
+  equipHammerBtn.addEventListener("mouseenter", () => {
+    showWeaponTooltip("hammer", equipHammerBtn);
+  });
+  equipHammerBtn.addEventListener("mouseleave", hideWeaponTooltip);
+}
+
+if (equipHammerBtn) {
+  equipHammerBtn.addEventListener("mouseenter", () => {
+    showWeaponTooltip("hammer", equipHammerBtn);
+  });
+  equipHammerBtn.addEventListener("mouseleave", hideWeaponTooltip);
+}
+
+function equipBugZapper() {
+  currentWeapon = weaponInventory.bugzapper;
+  currentWeaponKey = "bugzapper";
+  applyWeaponCursor();
+  updateUpgradeAvailability();
+}
+
+if (equipBugZapperBtn) {
+  equipBugZapperBtn.addEventListener("click", () => {
+    if (gameLevel < weaponUnlockLevel.bugzapper) {
+      equipBugZapperBtn.classList.add("locked-pulse");
+      setTimeout(() => equipBugZapperBtn.classList.remove("locked-pulse"), 150);
+      return;
+    }
+    equipBugZapper();
+    setWeaponButtonActive("bugzapper");
+  });
+
+  equipBugZapperBtn.addEventListener("mouseenter", () => {
+    showWeaponTooltip("bugzapper", equipBugZapperBtn);
+  });
+  equipBugZapperBtn.addEventListener("mouseleave", hideWeaponTooltip);
 }
 
 //more equip functions later
