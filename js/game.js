@@ -1348,13 +1348,6 @@ if (equipSwatterBtn) {
   equipSwatterBtn.addEventListener("mouseleave", hideWeaponTooltip);
 }
 
-if (equipSwatterBtn) {
-  equipSwatterBtn.addEventListener("mouseenter", () => {
-    showWeaponTooltip("swatter", equipSwatterBtn);
-  });
-  equipSwatterBtn.addEventListener("mouseleave", hideWeaponTooltip);
-}
-
 function equipHammer() {
   currentWeapon = weaponInventory.hammer;
   currentWeaponKey = "hammer";
@@ -1373,13 +1366,6 @@ if (equipHammerBtn) {
     setWeaponButtonActive("hammer");
   });
 
-  equipHammerBtn.addEventListener("mouseenter", () => {
-    showWeaponTooltip("hammer", equipHammerBtn);
-  });
-  equipHammerBtn.addEventListener("mouseleave", hideWeaponTooltip);
-}
-
-if (equipHammerBtn) {
   equipHammerBtn.addEventListener("mouseenter", () => {
     showWeaponTooltip("hammer", equipHammerBtn);
   });

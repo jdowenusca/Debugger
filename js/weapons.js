@@ -143,7 +143,7 @@ class BugZapperWeapon extends BaseWeapon {
   constructor() {
     super({
       name: "Bug Zapper",
-      damage: 10,         
+      damage: 10,
       hitRadius: 260,     // how far bolts can travel
       cursorSprite: "../IMG/menu/crosshair.png", // or reuse your swatter, or a +/- marker
       cursorWidth: 32,
@@ -178,13 +178,22 @@ class BugZapperWeapon extends BaseWeapon {
 
     if (typeof LightningBoltProjectile === "function") {
       new LightningBoltProjectile(playArea, startX, startY, targetX, targetY, {
+        width: 40,          // 🔹 thicker bolt for visibility (32 → 40)
         maxDistance,
         damage,
-        chainChance: 0.22,    // 22% chance to chain; tweak
-        maxChains: 3,         // max jumps after first hit
-        chainRadius: 220      // how far it can look for a new bug to jump to
+        chainChance: 0.22,  // tweak to taste
+        maxChains: 3,
+        chainRadius: 220,
+        fadeMs: 420         // 🔹 ~0.4s of visible lightning
       });
     }
+
+//Where to change behavior later:
+//  - Bolt thickness → width (above).
+//  - Range → hitRadius on BugZapperWeapon and maxDistance.
+//  - Minimum visual length → MIN_VISIBLE_LENGTH in LightningBoltProjectile.
+//  - Lifetime → fadeMs (per call) or default in constructor.
+//  - Chain behavior → chainChance, maxChains, chainRadius.
 
     // Let the game know we "attacked" even though we don't kill immediately.
     return {

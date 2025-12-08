@@ -1,3 +1,7 @@
+// NOTES FOR L8R:
+//  - Add requestAnimationFrame loop to update all bugs in one pass (good for high #s of bugs)
+//  - 
+
 // Global pause awareness
 // game.js will set window.isPaused
 

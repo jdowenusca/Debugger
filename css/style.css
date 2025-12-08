@@ -476,7 +476,7 @@ html, body {
   z-index: 8;
 
   /*Force a consistent visual size */
-  width: 20px;      /* tweak this number to make it larger/smaller */
+  width: 30px;      /* tweak this number to make it larger/smaller */
   height: auto;
 
   /*Make sure global img rules can't blow it up */

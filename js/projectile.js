@@ -109,7 +109,8 @@ class LightningBoltProjectile {
     chainChance = 0.22,
     maxChains = 3,
     chainRadius = 220,
-    depth = 0           // how many chains we've already done
+    depth = 0,           // how many chains we've already done
+    fadeMs = 260         // how long the bolt stays visible
   } = {}) {
 
     if (!playArea) return;
@@ -125,6 +126,7 @@ class LightningBoltProjectile {
     this.maxChains = maxChains;
     this.chainRadius = chainRadius;
     this.depth = depth;
+    this.fadeMs = fadeMs;
 
     // Direction from start to target
     let dx = targetX - startX;
@@ -152,7 +154,7 @@ class LightningBoltProjectile {
     }
 
     //Minimum visible length so you can at least *see* it
-    const MIN_VISIBLE_LENGTH = 40;
+    const MIN_VISIBLE_LENGTH = 60;
     this.beamLength = Math.max(MIN_VISIBLE_LENGTH, beamLength);
 
     // Compute end point (not strictly necessary, but useful conceptually)
@@ -245,23 +247,25 @@ class LightningBoltProjectile {
     return best;
   }
 
-  _createBeamElement(sprite, width) {
+    _createBeamElement(sprite, width) {
     const el = document.createElement("img");
     el.src = sprite;
-    el.classList.add("projectile-lightning");
+
+    // 🔹 Use both the generic projectile class and the lightning-specific class
+    el.classList.add("projectile", "projectile-lightning");
 
     el.style.position = "absolute";
     el.style.width = `${width}px`;
-    el.style.height = `${this.beamLength}px`; // 🔹 length = distance to hit
+    el.style.height = `${this.beamLength}px`; // length = distance to hit
     el.style.left = `${this.startX}px`;
     el.style.top = `${this.startY}px`;
 
     // Bottom-center is the origin, so bolt grows "up" along the rotated direction
     el.style.transformOrigin = "50% 100%";
 
-    // Angle of the beam
-    const angleDeg = Math.atan2(this.dirY, this.dirX) * 180 / Math.PI - 90;
-    // If your sprite is sideways, change "-90" to "+0" or "+90" until it looks right
+    // Use +90° like your bug zapper base (so it points at the cursor correctly)
+    const angleDeg = Math.atan2(this.dirY, this.dirX) * 180 / Math.PI + 90;
+
     el.style.transform = `translate(-50%, 0) rotate(${angleDeg}deg)`;
 
     el.style.pointerEvents = "none";
@@ -273,11 +277,10 @@ class LightningBoltProjectile {
     this.el = el;
   }
 
-  _flashAndRemove() {
+    _flashAndRemove() {
     if (!this.el) return;
 
-    // 🔹 Make this configurable-ish
-    const fadeMs = 260;  // how long the beam stays visible (tweak this)
+    const fadeMs = this.fadeMs;         // 🔹 configurable now
     const transitionSec = fadeMs / 1000;
 
     requestAnimationFrame(() => {
