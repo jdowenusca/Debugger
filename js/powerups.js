@@ -46,21 +46,30 @@ class DecreaseWCDPowerup extends BasePowerup {
   static sprite = "../IMG/powerups/decrease_wcd.png";
 
   constructor(targetWeapon) {
-    let originalCooldown;
+    let previousMultiplier;
 
     super({
       name: "Decrease WCD",
-      durationMs: 8000, // 8 seconds, tweak as needed
+      durationMs: 8000, // 8 seconds
       powerupSprite: DecreaseWCDPowerup.sprite,
       onApply: () => {
         if (!targetWeapon) return;
-        originalCooldown = targetWeapon.cooldownMs;
-        // Half the cooldown, but don't go below 50ms
-        targetWeapon.cooldownMs = Math.max(50, Math.round(targetWeapon.cooldownMs * 0.5));
+
+        // Ensure temp multiplier exists
+        if (typeof targetWeapon.tempCooldownMultiplier !== "number") {
+          targetWeapon.tempCooldownMultiplier = 1;
+        }
+
+        // Save previous
+        previousMultiplier = targetWeapon.tempCooldownMultiplier;
+
+        // Half the effective cooldown (stacking-safe)
+        targetWeapon.tempCooldownMultiplier = targetWeapon.tempCooldownMultiplier * 0.5;
       },
       onExpire: () => {
-        if (!targetWeapon || originalCooldown == null) return;
-        targetWeapon.cooldownMs = originalCooldown;
+        if (!targetWeapon) return;
+        // Restore previous temp multiplier
+        targetWeapon.tempCooldownMultiplier = previousMultiplier ?? 1;
       }
     });
   }
@@ -74,7 +83,7 @@ class IncreaseAttackPowerup extends BasePowerup {
   static sprite = "../IMG/powerups/increase_attack.png";
 
   constructor(targetWeapon) {
-    let originalDamage;
+    let previousBonus;
 
     super({
       name: "Increase Attack",
@@ -82,13 +91,22 @@ class IncreaseAttackPowerup extends BasePowerup {
       powerupSprite: IncreaseAttackPowerup.sprite,
       onApply: () => {
         if (!targetWeapon) return;
-        originalDamage = targetWeapon.damage;
-        // Example: +3 flat damage, you can change this to *1.5 if you prefer
-        targetWeapon.damage = originalDamage + 3;
+
+        // Ensure temp bonus exists
+        if (typeof targetWeapon.tempDamageBonus !== "number") {
+          targetWeapon.tempDamageBonus = 0;
+        }
+
+        // Save previous bonus
+        previousBonus = targetWeapon.tempDamageBonus;
+
+        // Add a flat +3 temporary damage
+        targetWeapon.tempDamageBonus = targetWeapon.tempDamageBonus + 3;
       },
       onExpire: () => {
-        if (!targetWeapon || originalDamage == null) return;
-        targetWeapon.damage = originalDamage;
+        if (!targetWeapon) return;
+        // Restore previous temp bonus
+        targetWeapon.tempDamageBonus = previousBonus ?? 0;
       }
     });
   }

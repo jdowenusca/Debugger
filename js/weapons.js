@@ -28,10 +28,24 @@ class BaseWeapon {
     this.description = description;
 
     this.lastAttackTime = 0;
+
+    this.tempDamageBonus = 0;          // additive bonus from powerups
+    this.tempCooldownMultiplier = 1;   // multiplicative cooldown factor (e.g. 0.5 = 50%)
+  }
+
+  // Effective damage = base + temporary bonus
+  getEffectiveDamage() {
+    return this.damage + (this.tempDamageBonus || 0);
+  }
+
+  // Effective cooldown = base * multiplier (with floor)
+  getEffectiveCooldownMs() {
+    const mult = (this.tempCooldownMultiplier == null ? 1 : this.tempCooldownMultiplier);
+    return Math.max(50, Math.round(this.cooldownMs * mult));
   }
 
   canAttack(now = performance.now()) {
-    return now - this.lastAttackTime >= this.cooldownMs;
+    return now - this.lastAttackTime >= this.getEffectiveCooldownMs();
   }
 
   tryAttack(hitX, hitY, bugs, now = performance.now()) {
@@ -68,7 +82,8 @@ class BaseWeapon {
 
       if (distSq <= this.hitRadius * this.hitRadius) {
         const wasAlive = !bug.isDead;
-        bug.takeDamage(this.damage);
+        const dmg = this.getEffectiveDamage();
+        bug.takeDamage(dmg);
 
         if (wasAlive && bug.isDead) {
           bugsKilled += 1;
@@ -113,7 +128,67 @@ class HammerWeapon extends BaseWeapon {
       cursorOffsetX: -15,
       cursorOffsetY: -10,
       cooldownMs: 1400, // slower but stronger
-      description: "A heavy hammer for heavy duty DeBugging. Slow, but reliable, and offering an additional +30% per Upgrade RAD."
+      description: "A heavy hammer for heavy duty DeBugging. Slow, but reliable, and offering an additional +30% RAD per Upgrade."
     });
+  }
+}
+
+// Zapper (Ranged weapon)
+// - damage: per-bolt damage
+// - hitRadius: max travel distance of a bolt
+// - cooldownMs: fire rate
+class BugZapperWeapon extends BaseWeapon {
+  constructor() {
+    super({
+      name: "Bug Zapper",
+      damage: 10,         
+      hitRadius: 260,     // how far bolts can travel
+      cursorSprite: "../IMG/menu/crosshair.png", // or reuse your swatter, or a +/- marker
+      cursorWidth: 32,
+      cursorHeight: 32,
+      cursorOffsetX: -16,
+      cursorOffsetY: -16,
+      cooldownMs: 450,    // fire rate
+      description: ""
+    });
+
+    // flag for ranged vs melee
+    this.isRanged = true;
+  }
+
+  // For ranged weapons, we "attack" by spawning a projectile instead of doing a radius check.
+  attack(targetX, targetY, bugs) {
+    // We don't do area melee hits here.
+    // Instead, Fire a LightningBoltProjectile from bottom-center of play area toward (targetX, targetY).
+    const playArea = document.getElementById("play-area");
+    if (!playArea) {
+      return { moneyGained: 0, bugsKilled: 0, killedBugCenters: [] };
+    }
+
+    // Spawn from the Bug Zapper base position at bottom center
+    const rect = playArea.getBoundingClientRect();
+    const startX = rect.width / 2;
+    const startY = rect.height; // bottom
+
+    // Lightning bolt range is based on hitRadius
+    const maxDistance = this.hitRadius;
+    const damage = this.getEffectiveDamage();
+
+    if (typeof LightningBoltProjectile === "function") {
+      new LightningBoltProjectile(playArea, startX, startY, targetX, targetY, {
+        maxDistance,
+        damage,
+        chainChance: 0.22,    // 22% chance to chain; tweak
+        maxChains: 3,         // max jumps after first hit
+        chainRadius: 220      // how far it can look for a new bug to jump to
+      });
+    }
+
+    // Let the game know we "attacked" even though we don't kill immediately.
+    return {
+      moneyGained: 0,
+      bugsKilled: 0,
+      killedBugCenters: []
+    };
   }
 }

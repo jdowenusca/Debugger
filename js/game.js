@@ -725,7 +725,6 @@ upgradeButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     const id = btn.dataset.upgradeId;
     handleUpgradeClick(id, btn);
-    console.log('Current bug meter max:' + bugMeterMax);
   });
 });
 
@@ -1191,6 +1190,11 @@ function handleSwatAt(hitX, hitY) {
 
   if (!didAttack) {
     return;
+  }
+
+  // Spawn melee-hit projectile centered on the hit
+  if (typeof MeleeHitProjectile === "function") {
+    new MeleeHitProjectile(playArea, hitX, hitY, currentWeapon.hitRadius);
   }
 
   // Swat animation

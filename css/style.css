@@ -460,6 +460,17 @@ html, body {
   transform: rotate(-30deg);
 }
 
+#bugzapper-base {
+  position: absolute;
+  bottom: 0;                 /* anchored to bottom of play area */
+  left: 50%;                 /* centered horizontally */
+  transform: translate(-50%, 0) rotate(0deg);
+  transform-origin: 50% 80%; /* pivot around near-bottom-center */
+  pointer-events: none;
+  display: none;             /* hidden until Bug Zapper is equipped */
+  z-index: 8;                /* below cursor/projectiles, above background */
+}
+
 /* Sidebar for upgrades */
 #upgrade-panel {
   background: #181818;

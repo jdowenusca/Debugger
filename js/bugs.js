@@ -288,6 +288,7 @@ class FlyBug extends BaseBug {
 
       walkFrames: [
         "../IMG/bugs/fly/flyBase.png",
+        "../IMG/bugs/fly/flyOut.png"
       ],
 
       deathFrame: "../IMG/bugs/fly/flyDead.png",
