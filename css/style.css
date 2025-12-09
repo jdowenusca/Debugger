@@ -99,7 +99,6 @@ body.game-active::before {
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 6px;
   border: 1px solid #666;
   background: #262626;
@@ -285,7 +284,6 @@ html, body {
   border: 1px solid #555;
   background: #222;
   cursor: pointer;
-
   width: 32px;   /* tweak to taste */
   height: 32px;
   display: flex;
@@ -454,12 +452,10 @@ html, body {
   border: 1px solid #555;
   border-radius: 4px;
   overflow: hidden;
-
-  /* New background image */
   background: #000 url("../IMG/menu/Background.png") center center / cover no-repeat;
-
   -webkit-user-drag: none;
   user-select: none;
+  cursor: none;
 }
 
 /* Swatter / crosshair cursor */
@@ -832,7 +828,6 @@ html, body {
   width: auto;                  /* 🔹 let content define width */
   max-height: 80vh;
   overflow-y: auto;
-
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1102,7 +1097,6 @@ html, body {
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
-
   display: flex;
   flex-direction: column;
   align-items: center;

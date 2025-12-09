@@ -273,7 +273,7 @@ class AntBug extends BaseBug {
       deathFrame: "../IMG/bugs/ant/antDead.png",
       animationIntervalMs: 100, // average speed
 
-      reward: 5000,
+      reward: 0.5,
       pathChangeChance: 0.1,
       score: 1
     });
