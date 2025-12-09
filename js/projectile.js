@@ -247,7 +247,7 @@ class LightningBoltProjectile {
     return best;
   }
 
-    _createBeamElement(sprite, width) {
+  _createBeamElement(sprite, width) {
     const el = document.createElement("img");
     el.src = sprite;
 
@@ -255,18 +255,18 @@ class LightningBoltProjectile {
     el.classList.add("projectile", "projectile-lightning");
 
     el.style.position = "absolute";
+    // Size: thickness (width) and length (height)
     el.style.width = `${width}px`;
-    el.style.height = `${this.beamLength}px`; // length = distance to hit
-    el.style.left = `${this.startX}px`;
-    el.style.top = `${this.startY}px`;
-
+    el.style.height = `${this.beamLength}px`;
+    // Place so that bottom-center of the bolt is at (startX, startY)
+    el.style.left = `${this.startX - width / 2}px`;
+    el.style.top = `${this.startY - this.beamLength}px`;
     // Bottom-center is the origin, so bolt grows "up" along the rotated direction
     el.style.transformOrigin = "50% 100%";
-
     // Use +90° like your bug zapper base (so it points at the cursor correctly)
     const angleDeg = Math.atan2(this.dirY, this.dirX) * 180 / Math.PI + 90;
+    el.style.transform = `rotate(${angleDeg}deg)`;
 
-    el.style.transform = `translate(-50%, 0) rotate(${angleDeg}deg)`;
 
     el.style.pointerEvents = "none";
     el.style.userSelect = "none";
@@ -277,7 +277,7 @@ class LightningBoltProjectile {
     this.el = el;
   }
 
-    _flashAndRemove() {
+  _flashAndRemove() {
     if (!this.el) return;
 
     const fadeMs = this.fadeMs;         // 🔹 configurable now

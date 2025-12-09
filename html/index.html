@@ -38,12 +38,22 @@
   <!-- Main Game Container -->
   <div id="game-container">
     <header id="game-header">
-      <button id="pause-button"> || </button>
+      <button id="pause-button">
+        <img src="../IMG/menu/PauseBtn.png" alt="Pause" class="pause-icon">
+      </button>
 
       <div id="score-container">
-        <img src="../IMG/menu/Score.png" alt="Score" class="score-label">
-        <span id="score-value" class="score-value">0</span>
+        <div class="stat-item">
+          <img src="../IMG/menu/Score.png" alt="Score" class="score-label">
+          <span id="score-value" class="score-value stat-value">0</span>
+        </div>
+
+        <div class="stat-item">
+          <img src="../IMG/menu/LVL.png" alt="LVL" class="score-label lvl-label">
+          <span id="level-value" class="score-value stat-value">1</span>
+        </div>
       </div>
+
 
       <div id="logo-wrapper">
         <img id="game-logo" src="../IMG/menu/Debuggerlogo.png" alt="Game Logo">

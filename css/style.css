@@ -188,21 +188,58 @@ html, body {
   margin-bottom: 12px;
 }
 
-#score-container {
+#stats {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
   gap: 4px;
 }
 
-.score-label {
-  height: 18px;   /* tweak to size your "Score" sprite */
+.stat-item {
+  flex-direction: row-reverse;  /* flips [icon][value] → [value][icon] */
+  gap: 4px;                     /* fixed spacing between value and sprite */
+}
+
+.stat-label {
+  height: 30px;    /* tweak to match your sprite */
   width: auto;
   display: block;
 }
 
-.score-value {
+.stat-value {
   font-family: monospace;
-  font-size: 1.2rem;  /* bump this up/down as desired */
+  min-width: 80px;
+  text-align: right;
+  font-size: 1.2rem;
+}
+
+/* Was: row; now we want vertical stack of two rows */
+#score-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;  /* space between Score and LVL rows */
+}
+
+/* Make Score & LVL match Money/Kills */
+.score-label {
+  height: 30px;   /* match your .stat-label height */
+  width: auto;
+  display: block;
+}
+
+.score-value.stat-value {
+  min-width: 80px;
+  text-align: right;
+}
+
+.lvl-label {
+    margin-right: 19px;   /* try 6–10px and adjust by feel */
+}
+
+/* Add this near your other HUD styles */
+#level-value {
+  margin-left: 6px;   /* try 4–10px and eyeball it */
 }
 
 #logo-wrapper {
@@ -229,32 +266,6 @@ html, body {
   display: block;
 }
 
-#stats {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.stat-label {
-  height: 30px;    /* tweak to match your sprite */
-  width: auto;
-  display: block;
-}
-
-.stat-value {
-  font-family: monospace;
-  min-width: 80px;
-  text-align: right;
-  font-size: 1.2rem;
-}
-
 #game-main {
   display: grid;
   grid-template-columns: 1fr 3fr 1fr; /* Weapons | Play | Upgrades */
@@ -269,21 +280,28 @@ html, body {
 }
 
 #pause-button {
-  padding: 4px 10px;
+  padding: 0;
   border-radius: 6px;
   border: 1px solid #555;
   background: #222;
-  color: #f5f5f5;
   cursor: pointer;
-  font-weight: bold;
-  font-size: 0.9rem;
-  line-height: 1;
-  min-width: 40px;
-  text-align: center;
+
+  width: 32px;   /* tweak to taste */
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #pause-button:hover {
   background: #333;
+}
+
+/* Pause icon sizing inside the button */
+#pause-button .pause-icon {
+  display: block;
+  width: 24px;   /* tweak until it feels right with your HUD */
+  height: auto;
 }
 
 /* Container for Bug Meter + label */
@@ -370,7 +388,7 @@ html, body {
 }
 
 .bugged-score-label {
-  height: 18px;   /* tweak to match the HUD score label size */
+  height: 50px;   /* tweak to match the HUD score label size */
   width: auto;
   display: block;
 }
@@ -382,7 +400,7 @@ html, body {
 
 .bugged-score-value {
   font-family: monospace;
-  font-size: 1.2rem;
+  font-size: 1.6rem;
 }
 
 #initials-entry {
@@ -444,7 +462,6 @@ html, body {
   user-select: none;
 }
 
-/* Swatter cursor */
 /* Swatter / crosshair cursor */
 #swatter-cursor {
   position: absolute;
@@ -453,13 +470,9 @@ html, body {
   transition: transform 0.05s ease;
   transform-origin: center center;
   z-index: 10;
-  /*Hard size clamps so it can't fill the screen */
-  width: 50px;
-  height: 50px;
-  max-width: 64px;
-  max-height: 64px;
   object-fit: contain;
 }
+
 /* Swat animation: just rotation now */
 #swatter-cursor.swat {
   transform: rotate(-30deg);
@@ -617,6 +630,7 @@ html, body {
 
 #weapon-panel {
   position: relative;
+  width: auto;
   background: #181818;
   border: 1px solid #555;
   border-radius: 4px;
@@ -628,16 +642,16 @@ html, body {
 }
 
 .weapon-button {
-  width: 100%;
-  margin-bottom: 6px;
-  padding: 4px;
-  border-radius: 4px;
-  border: 1px solid #666;
-  background: #262626;
-  cursor: pointer;
+  width: 150px;        /* adjust as desired */
+  height: 90px;       /* square button */
+  padding: 0;
+  border: none;
+  background: #181818;
+  border-radius: 8px;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
 .weapon-button.locked {
@@ -659,10 +673,11 @@ html, body {
 }
 
 .weapon-icon {
-  max-width: 64px;
-  max-height: 64px;
+  width: 80%;         /* or 100% if you want full-button fill */
+  height: 80%;
   object-fit: contain;
   display: block;
+  pointer-events: none; /* ensures button click still registers */
 }
 
 #ability-section {
@@ -802,8 +817,8 @@ html, body {
 }
 
 .overlay-title-img {
-  max-width: 100%;
-  height: auto;
+  height: 80px;
+  width: auto;
   margin-bottom: 16px;
   display: block;
 }
@@ -868,13 +883,21 @@ html, body {
   padding: 0;
   background: transparent;
   cursor: pointer;
+  /* NEW: fixed button box */
+  width: 180px;           /* same width as title buttons if you want */
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .overlay-button-img {
   display: block;
-  max-width: 220px;  /* tweak to control button sprite size */
-  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
   height: auto;
+  object-fit: contain;
 }
 
 .overlay-button:hover .overlay-button-img {
@@ -985,6 +1008,13 @@ html, body {
 
 #leaderboard-screen {
   z-index: 30;
+}
+
+#leaderboard-screen .overlay-title-img {
+  height: 150px;
+  width: auto;
+  margin-bottom: 16px;
+  display: block;
 }
 
 #about-screen {

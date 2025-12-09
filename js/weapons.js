@@ -108,9 +108,9 @@ class SwatterWeapon extends BaseWeapon {
       damage: 1,
       hitRadius: 30,
       cursorSprite: "../IMG/weapons/swatter/swatter.png",
-      cursorWidth: 50,
-      cursorOffsetX: -25,
-      cursorOffsetY: -30,
+      cursorWidth: 110,
+      cursorOffsetX: -55,
+      cursorOffsetY: -20,
       cooldownMs: 600, // 0.5 seconds between swings
       description: "Tried and true classic for therapeutic DeBugging. "
     });
@@ -125,10 +125,10 @@ class HammerWeapon extends BaseWeapon {
       damage: 7,
       hitRadius: 55,
       cursorSprite: "../IMG/weapons/hammer/hammer.png",
-      cursorWidth: 90,
-      cursorHeight: 90,
+      cursorWidth: 100,
+      cursorHeight: 100,
       cursorOffsetX: -15,
-      cursorOffsetY: -10,
+      cursorOffsetY: -30,
       cooldownMs: 1400, // slower but stronger
       description: "A heavy hammer for heavy duty DeBugging. Slow, but reliable, and offering an additional +30% RAD per Upgrade."
     });

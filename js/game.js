@@ -57,6 +57,7 @@ const moneyDisplay = document.getElementById("money-value");
 const bugsKilledDisplay = document.getElementById("bugs-killed-value");
 const scoreDisplay = document.getElementById("score-value");
 const buggedScoreDisplay = document.getElementById("bugged-score-value");
+const levelDisplay = document.getElementById("level-value");
 
 const BASE_BUG_METER_MAX = 100;               // max bug meter value
 const BASE_BUG_SPAWN_INTERVAL = 3000;         // ms at LVL 1
@@ -177,8 +178,8 @@ let currentWeaponKey = "swatter";
 
 const weaponUnlockLevel = {
   swatter: 1,
-  hammer: 1,
-  bugzapper: 1,
+  hammer: 3,
+  bugzapper: 5,
   // add more weapons and their unlock levels here
 }
 
@@ -288,6 +289,7 @@ const upgradeConfig = {
       updateUpgradeAvailability();
       updateWeaponAvailability();
       updateAbilityAvailability();
+      updateStatsUI();
     }
   }
 };
@@ -367,6 +369,10 @@ function updateStatsUI() {
 
   if (buggedScoreDisplay) {
     buggedScoreDisplay.textContent = `${bugScoreTotal}`;
+  }
+
+  if (levelDisplay) {
+    levelDisplay.textContent = gameLevel || 1;
   }
 }
 
@@ -571,10 +577,11 @@ function resetGameProgress() {
   activePowerupPickups = [];
   window.activePowerupPickups = activePowerupPickups;
 
-  // Reset money / kills / score
+  // Reset money / kills / score / game LVL
   money = 0;
   bugsKilled = 0;
   bugScoreTotal = 0;
+  gameLevel = 1;
   updateStatsUI();
 
   // Reset Bug Meter
@@ -585,7 +592,6 @@ function resetGameProgress() {
   // Reset game level and spawn rate
   bugSpawnIntervalMs = 3000;
   restartBugSpawner();
-  gameLevel = 1;
 
   // Reset weapons & multipliers
   weaponInventory.swatter = new SwatterWeapon();
@@ -1183,7 +1189,7 @@ function handleSwatAt(hitX, hitY) {
     return;
   }
 
-  // 🔹 Spawn melee-hit projectile ONLY for melee weapons
+  // Spawn melee-hit projectile ONLY for melee weapons
   if (!currentWeapon.isRanged && typeof MeleeHitProjectile === "function") {
     new MeleeHitProjectile(playArea, hitX, hitY, currentWeapon.hitRadius);
   }
