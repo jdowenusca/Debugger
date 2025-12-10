@@ -11,7 +11,7 @@
 
 class BaseProjectile {
   constructor(playArea, x, y, {
-    sprite = "../img/effects/melee_hit.png",
+    sprite = "./img/effects/melee_hit.png",
     width = 40,
     height = 40,
     lifetimeMs = 120,
@@ -78,7 +78,7 @@ class MeleeHitProjectile extends BaseProjectile {
     const diameter = hitRadius * 2;
 
     super(playArea, x, y, {
-      sprite: "../img/weapons/general/impactHit.png",   // <--- put your hit marker sprite here
+      sprite: "./img/weapons/general/impactHit.png",   // <--- put your hit marker sprite here
       width: diameter,
       height: diameter,
       lifetimeMs: 200,
@@ -102,7 +102,7 @@ class MeleeHitProjectile extends BaseProjectile {
 
 class LightningBoltProjectile {
   constructor(playArea, startX, startY, targetX, targetY, {
-    sprite = "../img/weapons/general/lightningBolt.png",
+    sprite = "./img/weapons/general/lightningBolt.png",
     width = 32,          // bolt thickness
     maxDistance = 260,
     damage = 4,

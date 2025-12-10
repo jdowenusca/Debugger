@@ -107,7 +107,7 @@ class SwatterWeapon extends BaseWeapon {
       name: "Bug Swatter",
       damage: 1,
       hitRadius: 30,
-      cursorSprite: "../img/weapons/swatter/swatter.png",
+      cursorSprite: "./img/weapons/swatter/swatter.png",
       cursorWidth: 110,
       cursorOffsetX: -55,
       cursorOffsetY: -20,
@@ -124,7 +124,7 @@ class HammerWeapon extends BaseWeapon {
       name: "Bug Hammer",
       damage: 7,
       hitRadius: 55,
-      cursorSprite: "../img/weapons/hammer/hammer.png",
+      cursorSprite: "./img/weapons/hammer/hammer.png",
       cursorWidth: 100,
       cursorHeight: 100,
       cursorOffsetX: -15,
@@ -145,7 +145,7 @@ class BugZapperWeapon extends BaseWeapon {
       name: "Bug Zapper",
       damage: 10,
       hitRadius: 260,     // how far bolts can travel
-      cursorSprite: "../img/menu/crosshair.png", // or reuse your swatter, or a +/- marker
+      cursorSprite: "./img/menu/crosshair.png", // or reuse your swatter, or a +/- marker
       cursorWidth: 32,
       cursorHeight: 32,
       cursorOffsetX: -16,

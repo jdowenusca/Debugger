@@ -50,7 +50,7 @@ class BaseBug {
       walkFrames = [],      // array of image paths used while alive
       deathFrame = null,    // image path for squish frame
 
-      img = "../img/bugs/default.png", // fallback if no walkFrames
+      img = "./img/bugs/default.png", // fallback if no walkFrames
       reward = 1,
       pathChangeChance = 0.02,
       score = 1,
@@ -266,11 +266,11 @@ class AntBug extends BaseBug {
       spriteHeight: 20,
 
       walkFrames: [
-        "../img/bugs/ant/antLeft.png",
-        "../img/bugs/ant/antBase.png",
-        "../img/bugs/ant/antRight.png"
+        "./img/bugs/ant/antLeft.png",
+        "./img/bugs/ant/antBase.png",
+        "./img/bugs/ant/antRight.png"
       ],
-      deathFrame: "../img/bugs/ant/antDead.png",
+      deathFrame: "./img/bugs/ant/antDead.png",
       animationIntervalMs: 100, // average speed
 
       reward: 0.5,
@@ -291,11 +291,11 @@ class FlyBug extends BaseBug {
       spriteHeight: 20,
 
       walkFrames: [
-        "../img/bugs/fly/flyBase.png",
-        "../img/bugs/fly/flyOut.png"
+        "./img/bugs/fly/flyBase.png",
+        "./img/bugs/fly/flyOut.png"
       ],
 
-      deathFrame: "../img/bugs/fly/flyDead.png",
+      deathFrame: "./img/bugs/fly/flyDead.png",
       animationIntervalMs: 90,    // quick flappy animation
 
       reward: 1.0,                // more payout than ant (0.5)
@@ -334,14 +334,14 @@ class RoachBug extends BaseBug {
       size: 38,
       spriteWidth: 26,
       spriteHeight: 42,
-      img: "../img/bugs/roach/roachBase.png",
+      img: "./img/bugs/roach/roachBase.png",
       
       walkFrames: [
-        "../img/bugs/roach/roachLeft.png",
-        "../img/bugs/roach/roachBase.png",
-        "../img/bugs/roach/roachRight.png"
+        "./img/bugs/roach/roachLeft.png",
+        "./img/bugs/roach/roachBase.png",
+        "./img/bugs/roach/roachRight.png"
       ],
-      deathFrame: "../img/bugs/roach/roachDead.png",
+      deathFrame: "./img/bugs/roach/roachDead.png",
       animationIntervalMs: 120, // slower steps
       
       reward: 3,
@@ -379,14 +379,14 @@ class SpiderBug extends BaseBug {
       size: 48,
       spriteWidth: 58,
       spriteHeight: 64,
-      img: "../img/bugs/spider/spiderBase.png",
+      img: "./img/bugs/spider/spiderBase.png",
       
       walkFrames: [
-        "../img/bugs/spider/spiderLeft.png",
-        "../img/bugs/spider/spiderBase.png",
-        "../img/bugs/spider/spiderRight.png"
+        "./img/bugs/spider/spiderLeft.png",
+        "./img/bugs/spider/spiderBase.png",
+        "./img/bugs/spider/spiderRight.png"
       ],
-      deathFrame: "../img/bugs/spider/spiderDead.png",
+      deathFrame: "./img/bugs/spider/spiderDead.png",
       animationIntervalMs: 60, // fast, jittery steps
       
       reward: 10,
@@ -426,10 +426,10 @@ class WaspBug extends BaseBug {
       spriteHeight: 64,
 
       walkFrames: [
-        "../img/bugs/wasp/waspBack.png",
-        "../img/bugs/wasp/waspBase.png"
+        "./img/bugs/wasp/waspBack.png",
+        "./img/bugs/wasp/waspBase.png"
       ],
-      deathFrame: "../img/bugs/wasp/waspDead.png",
+      deathFrame: "./img/bugs/wasp/waspDead.png",
       animationIntervalMs: 80,    // snappy animation
 
       reward: 6,                  // good money
@@ -459,11 +459,11 @@ class BeetleBug extends BaseBug {
       spriteHeight: 78,
 
       walkFrames: [
-        "../img/bugs/beetle/beetleBack.png",
-        "../img/bugs/beetle/beetleBase.png"
+        "./img/bugs/beetle/beetleBack.png",
+        "./img/bugs/beetle/beetleBase.png"
       ],
       
-      deathFrame: "../img/bugs/beetle/beetleDead.png",
+      deathFrame: "./img/bugs/beetle/beetleDead.png",
       animationIntervalMs: 130,   // lumbering steps
 
       reward: 20,                 // big payout
