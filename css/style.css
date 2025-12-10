@@ -153,11 +153,6 @@ body.game-active::before {
   line-height: 1.2;
 }
 
-html, body {
-  zoom: reset;          /* prevents browser-based zoom scaling */
-  touch-action: none;
-}
-
 #game-container {
   height: auto;
   width: 1000px;
