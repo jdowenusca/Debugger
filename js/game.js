@@ -680,7 +680,7 @@ function spawnPowerupPickup(entry, x, y) {
   img.classList.add("powerup-pickup");
 
   // Use the static sprite from the class
-  img.src = entry.classRef.sprite || "../IMG/powerups/default.png";
+  img.src = entry.classRef.sprite || "../img/powerups/default.png";
 
   img.style.position = "absolute";
   img.style.left = x + "px";

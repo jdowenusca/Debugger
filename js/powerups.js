@@ -6,7 +6,7 @@ class BasePowerup {
   constructor({
     name = "Unnamed Powerup",
     durationMs = 10000, // 10 seconds default
-    powerupSprite = "../IMG/powerups/default.png",
+    powerupSprite = "../img/powerups/default.png",
     onApply = () => {},
     onExpire = () => {},
   } = {}) {
@@ -43,7 +43,7 @@ class BasePowerup {
 // (Decrease Weapon Cooldown)
 // --------------------------------------
 class DecreaseWCDPowerup extends BasePowerup {
-  static sprite = "../IMG/powerups/decrease_wcd.png";
+  static sprite = "../img/powerups/decrease_wcd.png";
 
   constructor(targetWeapon) {
     let previousMultiplier;
@@ -80,7 +80,7 @@ class DecreaseWCDPowerup extends BasePowerup {
 // (Temporarily boosts current weapon damage)
 // --------------------------------------
 class IncreaseAttackPowerup extends BasePowerup {
-  static sprite = "../IMG/powerups/increase_attack.png";
+  static sprite = "../img/powerups/increase_attack.png";
 
   constructor(targetWeapon) {
     let previousBonus;
@@ -117,7 +117,7 @@ class IncreaseAttackPowerup extends BasePowerup {
 // (x1.5 bug value)
 // --------------------------------------
 class IncreaseMoneyPowerup extends BasePowerup {
-  static sprite = "../IMG/powerups/increase_money.png";
+  static sprite = "../img/powerups/increase_money.png";
 
   constructor() {
     let appliedMultiplier = 1.5;
@@ -145,7 +145,7 @@ class IncreaseMoneyPowerup extends BasePowerup {
 // Massive damage to ALL bugs on activation
 // --------------------------------------
 class BigBugBombPowerup extends BasePowerup {
-  static sprite = "../IMG/powerups/bbb.png";
+  static sprite = "../img/powerups/bbb.png";
 
   constructor() {
     super({
@@ -175,7 +175,7 @@ class BigBugBombPowerup extends BasePowerup {
 // (Optional) POWERUP: Double Money (updated to use sprite)
 // --------------------------------------
 class DoubleMoneyPowerup extends BasePowerup {
-  static sprite = "../IMG/powerups/double_money.png";
+  static sprite = "../img/powerups/double_money.png";
 
   constructor() {
     let appliedMultiplier = 2;
