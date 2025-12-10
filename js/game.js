@@ -376,6 +376,10 @@ function updateStatsUI() {
   }
 }
 
+window.getCurrentScore = function () {
+  return bugScoreTotal;
+};
+
 function applyWeaponCursor() {
   if (!swatter || !currentWeapon) return;
 
@@ -966,53 +970,6 @@ if (closeOptionsBtn) {
 
 if (closeAboutBtn) {
   closeAboutBtn.addEventListener("click", closeAbout);
-}
-
-if (submitScoreButton && initialsInput) {
-  submitScoreButton.addEventListener("click", async () => {
-    if (scoreSubmittedForRun) {
-      if (submitMessage) {
-        submitMessage.textContent = "Score already submitted for this run.";
-      }
-      return;
-    }
-
-    let initials = initialsInput.value.trim().toUpperCase();
-
-    // Exactly 3 alphanumeric characters
-    if (!/^[A-Z0-9]{3}$/.test(initials)) {
-      if (submitMessage) {
-        submitMessage.textContent = "Please enter exactly 3 letters or numbers.";
-      }
-      return;
-    }
-
-    if (typeof window.submitScoreToLeaderboard !== "function") {
-      if (submitMessage) {
-        submitMessage.textContent = "Score system not available.";
-      }
-      return;
-    }
-
-    try {
-      // Use bugScoreTotal as the final score
-      await window.submitScoreToLeaderboard(initials, bugScoreTotal);
-
-      scoreSubmittedForRun = true;
-
-      if (submitMessage) {
-        submitMessage.textContent = "Score submitted! Check the leaderboard 🏆";
-      }
-
-      submitScoreButton.disabled = true;
-      initialsInput.disabled = true;
-    } catch (err) {
-      console.error(err);
-      if (submitMessage) {
-        submitMessage.textContent = "Error submitting score. Please try again.";
-      }
-    }
-  });
 }
 
 // Allow clicking outside panel to close
