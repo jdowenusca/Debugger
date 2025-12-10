@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Link to CSS styles -->
-  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="./css/style.css" />
 </head>
 
 <body>
@@ -16,20 +16,20 @@
     <button id="btn-about" class="about-button"> ? </button>
     <button id="btn-leaderboard" class="leaderboard-button">🏆</button>
     <div id="title-content">
-      <img id="title-logo" src="../img/menu/Debuggerlogo.png" alt="Debugger Logo">
+      <img id="title-logo" src="./img/menu/Debuggerlogo.png" alt="Debugger Logo">
 
       <div id="title-buttons">
         <button id="btn-debug" class="title-button">
-          <img src="../img/menu/Debug.png" alt="DEBUG">
+          <img src="./img/menu/Debug.png" alt="DEBUG">
         </button>
         <!--<button id="btn-journal">
-          <img src="../img/menu/Journal.png" alt="Journal">
+          <img src="./img/menu/Journal.png" alt="Journal">
         </button> -->
         <button id="btn-options" class="title-button">
-          <img src="../img/menu/Options.png" alt="Options">
+          <img src="./img/menu/Options.png" alt="Options">
         </button>
         <button id="btn-quit-game" class="title-button">
-          <img src="../img/menu/Quit.png" alt="Quit">
+          <img src="./img/menu/Quit.png" alt="Quit">
         </button>
       </div>
     </div>
@@ -39,34 +39,34 @@
   <div id="game-container">
     <header id="game-header">
       <button id="pause-button">
-        <img src="../img/menu/PauseBtn.png" alt="Pause" class="pause-icon">
+        <img src="./img/menu/PauseBtn.png" alt="Pause" class="pause-icon">
       </button>
 
       <div id="score-container">
         <div class="stat-item">
-          <img src="../img/menu/Score.png" alt="Score" class="score-label">
+          <img src="./img/menu/Score.png" alt="Score" class="score-label">
           <span id="score-value" class="score-value stat-value">0</span>
         </div>
 
         <div class="stat-item">
-          <img src="../img/menu/LVL.png" alt="LVL" class="score-label lvl-label">
+          <img src="./img/menu/LVL.png" alt="LVL" class="score-label lvl-label">
           <span id="level-value" class="score-value stat-value">1</span>
         </div>
       </div>
 
 
       <div id="logo-wrapper">
-        <img id="game-logo" src="../img/menu/Debuggerlogo.png" alt="Game Logo">
+        <img id="game-logo" src="./img/menu/Debuggerlogo.png" alt="Game Logo">
       </div>
 
       <div id="stats">
         <div class="stat-item">
-          <img src="../img/menu/Money.png" alt="Money" class="stat-label">
+          <img src="./img/menu/Money.png" alt="Money" class="stat-label">
           <span id="money-value" class="stat-value">$0.00</span>
         </div>
 
         <div class="stat-item">
-          <img src="../img/menu/Kills.png" alt="Kills" class="stat-label">
+          <img src="./img/menu/Kills.png" alt="Kills" class="stat-label">
           <span id="bugs-killed-value" class="stat-value">0</span>
         </div>
       </div>
@@ -77,18 +77,18 @@
       <!-- Weapons panel on the left -->
       <aside id="weapon-panel">
         <div class="panel-title">
-          <img src="../img/menu/Tools.png" alt="Tools" class="panel-title-img">
+          <img src="./img/menu/Tools.png" alt="Tools" class="panel-title-img">
         </div>
         <button id="equip-swatter" class="weapon-button">
-          <img src="../img/weapons/swatter/swatter.png" alt="" class="weapon-icon">
+          <img src="./img/weapons/swatter/swatter.png" alt="" class="weapon-icon">
         </button>
 
         <button id="equip-hammer" class="weapon-button">
-          <img src="../img/weapons/hammer/hammer.png" alt="" class="weapon-icon">
+          <img src="./img/weapons/hammer/hammer.png" alt="" class="weapon-icon">
         </button>
 
         <button id="equip-bugzapper" class="weapon-button">
-          <img src="../img/weapons/zapper/zapper.png" alt="" class="weapon-icon">
+          <img src="./img/weapons/zapper/zapper.png" alt="" class="weapon-icon">
         </button>
 
         <!-- More weapon buttons can be added here -->
@@ -110,50 +110,50 @@
           </div>
 
           <!-- Ranged weapon anchor -->
-          <img id="bugzapper-base" src="../img/weapons/zapper/zapperBase.png" alt="Bug Zapper">
+          <img id="bugzapper-base" src="./img/weapons/zapper/zapperBase.png" alt="Bug Zapper">
 
 
           <!-- Swatter cursor -->
-          <img id="swatter-cursor" src="../img/swatter.png" alt="Swatter">
+          <img id="swatter-cursor" src="./img/swatter.png" alt="Swatter">
         </div>
         <div id="ability-section">
           <div class="panel-title">
-            <img src="../img/menu/Abilities.png" alt="Abilities" class="panel-title-img">
+            <img src="./img/menu/Abilities.png" alt="Abilities" class="panel-title-img">
           </div>
           <div id="ability-bar">
             <button class="ability-button" data-ability-id="bugserk">
-              <img src="../img/abilities/bugserk.png" alt="Bugserk" class="ability-icon"
-                onerror="this.onerror=null; this.src='../img/abilities/placeholder.png'">
+              <img src="./img/abilities/bugserk.png" alt="Bugserk" class="ability-icon"
+                onerror="this.onerror=null; this.src='./img/abilities/placeholder.png'">
               <span class="ability-label">Bugserk</span>
             </button>
 
             <button class="ability-button" data-ability-id="bug-tape">
-              <img src="../img/abilities/bug_tape.png" alt="Bug Tape" class="ability-icon"
-                onerror="this.onerror=null; this.src='../img/abilities/placeholder.png'">
+              <img src="./img/abilities/bug_tape.png" alt="Bug Tape" class="ability-icon"
+                onerror="this.onerror=null; this.src='./img/abilities/placeholder.png'">
               <span class="ability-label">Bug Tape</span>
             </button>
 
             <button class="ability-button" data-ability-id="bug-drone">
-              <img src="../img/abilities/bug_drone.png" alt="Cordyceps" class="ability-icon"
-                onerror="this.onerror=null; this.src='../img/abilities/placeholder.png'">
+              <img src="./img/abilities/bug_drone.png" alt="Cordyceps" class="ability-icon"
+                onerror="this.onerror=null; this.src='./img/abilities/placeholder.png'">
               <span class="ability-label">Cordyceps</span>
             </button>
 
             <button class="ability-button" data-ability-id="immortal-snail">
-              <img src="../img/abilities/immortal_snail.png" alt="ImmortalSnail" class="ability-icon"
-                onerror="this.onerror=null; this.src='../img/abilities/placeholder.png'">
+              <img src="./img/abilities/immortal_snail.png" alt="ImmortalSnail" class="ability-icon"
+                onerror="this.onerror=null; this.src='./img/abilities/placeholder.png'">
               <span class="ability-label">Immortal Snail</span>
             </button>
 
             <button class="ability-button" data-ability-id="singularity">
-              <img src="../img/abilities/singularity.png" alt="Singularity" class="ability-icon"
-                onerror="this.onerror=null; this.src='../img/abilities/placeholder.png'">
+              <img src="./img/abilities/singularity.png" alt="Singularity" class="ability-icon"
+                onerror="this.onerror=null; this.src='./img/abilities/placeholder.png'">
               <span class="ability-label">Singularity</span>
             </button>
 
             <button class="ability-button" data-ability-id="slapshot">
-              <img src="../img/abilities/slapshot.png" alt="Slapshot" class="ability-icon"
-                onerror="this.onerror=null; this.src='../img/abilities/placeholder.png'">
+              <img src="./img/abilities/slapshot.png" alt="Slapshot" class="ability-icon"
+                onerror="this.onerror=null; this.src='./img/abilities/placeholder.png'">
               <span class="ability-label">Slapshot</span>
             </button>
           </div>
@@ -163,7 +163,7 @@
       <!-- Upgrades panel on the right -->
       <aside id="upgrade-panel">
         <div class="panel-title">
-          <img src="../img/menu/Upgrades.png" alt="" class="panel-title-img">
+          <img src="./img/menu/Upgrades.png" alt="" class="panel-title-img">
         </div>
 
         <div id="upgrade-list">
@@ -171,7 +171,7 @@
           <div class="upgrade-card" data-upgrade-id="increase-atk">
             <div class="upgrade-top">
               <div class="upgrade-sprite-wrapper">
-                <img src="../img/upgrades/increase_attack.png" alt="Increase ATK" class="upgrade-sprite">
+                <img src="./img/upgrades/increase_attack.png" alt="Increase ATK" class="upgrade-sprite">
               </div>
               <div class="upgrade-button-wrapper">
                 <button class="upgrade-button" data-upgrade-id="increase-atk">Upgrade: $10</button>
@@ -189,7 +189,7 @@
           <div class="upgrade-card" data-upgrade-id="increase-rad">
             <div class="upgrade-top">
               <div class="upgrade-sprite-wrapper">
-                <img src="../img/upgrades/increase_rad.png" alt="Increase RAD" class="upgrade-sprite">
+                <img src="./img/upgrades/increase_rad.png" alt="Increase RAD" class="upgrade-sprite">
               </div>
               <div class="upgrade-button-wrapper">
                 <button class="upgrade-button" data-upgrade-id="increase-rad">Upgrade: $10</button>
@@ -207,7 +207,7 @@
           <div class="upgrade-card" data-upgrade-id="decrease-wcd">
             <div class="upgrade-top">
               <div class="upgrade-sprite-wrapper">
-                <img src="../img/upgrades/decrease_wcd.png" alt="Decrease WCD" class="upgrade-sprite">
+                <img src="./img/upgrades/decrease_wcd.png" alt="Decrease WCD" class="upgrade-sprite">
               </div>
               <div class="upgrade-button-wrapper">
                 <button class="upgrade-button" data-upgrade-id="decrease-wcd">Upgrade: $10</button>
@@ -225,7 +225,7 @@
           <div class="upgrade-card" data-upgrade-id="decrease-acd">
             <div class="upgrade-top">
               <div class="upgrade-sprite-wrapper">
-                <img src="../img/upgrades/decrease_acd.png" alt="Decrease ACD" class="upgrade-sprite">
+                <img src="./img/upgrades/decrease_acd.png" alt="Decrease ACD" class="upgrade-sprite">
               </div>
               <div class="upgrade-button-wrapper">
                 <button class="upgrade-button" data-upgrade-id="decrease-acd">Upgrade: $10</button>
@@ -243,7 +243,7 @@
           <div class="upgrade-card" data-upgrade-id="increase-money">
             <div class="upgrade-top">
               <div class="upgrade-sprite-wrapper">
-                <img src="../img/upgrades/increase_money.png" alt="Increase $$$" class="upgrade-sprite">
+                <img src="./img/upgrades/increase_money.png" alt="Increase $$$" class="upgrade-sprite">
               </div>
               <div class="upgrade-button-wrapper">
                 <button class="upgrade-button" data-upgrade-id="increase-money">Upgrade: $10</button>
@@ -261,7 +261,7 @@
           <div class="upgrade-card" data-upgrade-id="increase-lvl">
             <div class="upgrade-top">
               <div class="upgrade-sprite-wrapper">
-                <img src="../img/upgrades/increase_lvl.png" alt="Increase LVL" class="upgrade-sprite">
+                <img src="./img/upgrades/increase_lvl.png" alt="Increase LVL" class="upgrade-sprite">
               </div>
               <div class="upgrade-button-wrapper">
                 <button class="upgrade-button" data-upgrade-id="increase-lvl">Upgrade: $10</button>
@@ -371,20 +371,20 @@
   <!-- Pause Screen -->
   <div id="pause-screen" class="overlay-panel">
     <div class="panel-content pause-content">
-      <img src="../img/menu/Paused.png" alt="Paused" class="overlay-title-img">
+      <img src="./img/menu/Paused.png" alt="Paused" class="overlay-title-img">
 
       <div class="pause-buttons">
         <button id="btn-rebug" class="overlay-button">
-          <img src="../img/menu/Rebug.png" alt="Rebug" class="overlay-button-img">
+          <img src="./img/menu/Rebug.png" alt="Rebug" class="overlay-button-img">
         </button>
         <button id="btn-pause-options" class="overlay-button">
-          <img src="../img/menu/Options.png" alt="Options" class="overlay-button-img">
+          <img src="./img/menu/Options.png" alt="Options" class="overlay-button-img">
         </button>
         <!--<button id="btn-pause-journal" class="overlay-button">
-          <img src="../img/menu/Journal.png" alt="" class="overlay-button-img">
+          <img src="./img/menu/Journal.png" alt="" class="overlay-button-img">
         </button> -->
         <button id="btn-quit" class="overlay-button">
-          <img src="../img/menu/Quit.png" alt="Quit" class="overlay-button-img">
+          <img src="./img/menu/Quit.png" alt="Quit" class="overlay-button-img">
         </button>
       </div>
     </div>
@@ -395,7 +395,7 @@
     <div class="panel-content bugged-content">
 
       <div id="bugged-score-row">
-        <img src="../img/menu/Score.png" alt="Score" class="bugged-score-label">
+        <img src="./img/menu/Score.png" alt="Score" class="bugged-score-label">
         <span class="bugged-score-separator">:</span>
         <span id="bugged-score-value" class="bugged-score-value">0</span>
       </div>
@@ -416,10 +416,10 @@
 
       <div class="bugged-buttons">
         <button id="btn-rebug-gameover" class="overlay-button">
-          <img src="../img/menu/Rebug.png" alt="Rebug" class="overlay-button-img">
+          <img src="./img/menu/Rebug.png" alt="Rebug" class="overlay-button-img">
         </button>
         <button id="btn-quit-from-bugged" class="overlay-button">
-          <img src="../img/menu/Quit.png" alt="Quit" class="overlay-button-img">
+          <img src="./img/menu/Quit.png" alt="Quit" class="overlay-button-img">
         </button>
       </div>
     </div>
@@ -428,7 +428,7 @@
   <!-- Leaderboard Screen -->
   <div id="leaderboard-screen" class="overlay-panel">
     <div class="panel-content leaderboard-content">
-      <img src="../img/menu/Leaderboard.png" alt="Leaderboard" class="overlay-title-img">
+      <img src="./img/menu/Leaderboard.png" alt="Leaderboard" class="overlay-title-img">
 
       <table id="leaderboard-list" class="ranking-list">
         <thead>
@@ -448,11 +448,11 @@
   </div>
 
   <!-- Scripts of JS files -->
-  <script src="../js/bugs.js"></script>
-  <script src="../js/weapons.js"></script>
-  <script src="../js/powerups.js"></script>
-  <script src="../js/projectile.js"></script>
-  <script src="../js/game.js"></script>
+  <script src="./js/bugs.js"></script>
+  <script src="./js/weapons.js"></script>
+  <script src="./js/powerups.js"></script>
+  <script src="./js/projectile.js"></script>
+  <script src="./js/game.js"></script>
 
 
   <!-- Firebase Database -->
