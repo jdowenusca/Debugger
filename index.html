@@ -485,6 +485,11 @@
     const db = getFirestore(app);
     const quancollection = collection(db, "DeBugger");
 
+    // DOM elements from the leaderboard pop-up
+    const submitBtn = document.getElementById("submit-score-button");
+    const initialsInput = document.getElementById("player-initials");
+    const submitMsg = document.getElementById("submit-message");
+
     // 🔹 Expose a global function so game.js can call it
     window.submitScoreToLeaderboard = async function (name, score) {
       try {
