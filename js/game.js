@@ -1517,10 +1517,9 @@ abilityButtons.forEach((btn) => {
 document.addEventListener("keydown", (event) => {
   if (!spacebarClickEnabled) return;
 
-  // Only care about spacebar
   if (event.code === "Space" || event.key === " ") {
 
-    // 🔹 Ignore auto-repeat while holding space
+    // Avoid auto-repeat spam when holding space
     if (event.repeat) {
       event.preventDefault();
       return;
@@ -1528,18 +1527,25 @@ document.addEventListener("keydown", (event) => {
 
     event.preventDefault();
 
-    // Game must be in a valid state
     if (!gameStarted || isPaused) return;
     if (!playArea) return;
-
-    // 🔹 Need a valid cursor position *inside* the play area
     if (lastCursorX == null || lastCursorY == null) return;
 
-    // If the swatter is hidden, don't swat (prevents firing while "outside")
-    if (swatter && swatter.style.display === "none") return;
+    // Convert play-area coords → viewport coords for a synthetic click
+    const rect = playArea.getBoundingClientRect();
+    const clientX = rect.left + lastCursorX;
+    const clientY = rect.top + lastCursorY;
 
-    // Now this is logically the same as a click at the cursor
-    handleSwatAt(lastCursorX, lastCursorY);
+    const clickEvent = new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      clientX,
+      clientY,
+      button: 0, // left click
+    });
+
+    // This will go through the exact same click handler as the mouse
+    playArea.dispatchEvent(clickEvent);
   }
 });
 
