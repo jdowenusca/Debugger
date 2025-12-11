@@ -468,7 +468,8 @@
       query,
       orderBy,
       limit,
-      addDoc
+      addDoc,
+      serverTimestamp
     } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js';
 
     const firebaseConfig = {
@@ -485,19 +486,60 @@
     const db = getFirestore(app);
     const quancollection = collection(db, "DeBugger");
 
-    // 🔹 Expose a global function so game.js can call it
-    window.submitScoreToLeaderboard = async function (name, score) {
-      try {
-        await addDoc(quancollection, {
-          name,
-          score
-        });
-        console.log("Score submitted:", name, score);
-      } catch (err) {
-        console.error("Error submitting score:", err);
-        throw err;
-      }
-    };
+    // DOM elements from the leaderboard pop-up
+    const submitBtn = document.getElementById("submit-score-button");
+    const initialsInput = document.getElementById("player-initials");
+    const submitMsg = document.getElementById("submit-message");
+
+    // Handle score submission directly here (no global submitScoreToLeaderboard)
+    if (submitBtn && initialsInput && submitMsg) {
+      submitBtn.addEventListener("click", async () => {
+        // Prevent double-click spam in the same run
+        if (submitBtn.disabled) {
+          return;
+        }
+
+        const initials = initialsInput.value.trim().toUpperCase();
+
+        // Must match your Firestore rules: exactly 3 A–Z or 0–9
+        if (!/^[A-Z0-9]{3}$/.test(initials)) {
+          submitMsg.textContent = "Please enter exactly 3 letters or numbers.";
+          return;
+        }
+
+        // Get the current score from game.js
+        const rawScore = (typeof window.getCurrentScore === "function")
+          ? window.getCurrentScore()
+          : 0;
+
+        // Clamp & sanitize score (extra safety; rules also enforce)
+        const safeScore = Math.max(
+          0,
+          Math.min(100_000_000_000_000_000, Math.floor(rawScore || 0))
+        );
+
+        try {
+          // Optimistically disable inputs to avoid dupes
+          submitBtn.disabled = true;
+          initialsInput.disabled = true;
+
+          await addDoc(quancollection, {
+            name: initials,
+            score: safeScore,
+            createdAt: serverTimestamp()
+          });
+
+          submitMsg.textContent = "Score submitted! Check the leaderboard 🏆";
+        } catch (err) {
+          console.error(err);
+          submitMsg.textContent = "Error submitting score. Please try again.";
+
+          // Re-enable if submission failed
+          submitBtn.disabled = false;
+          initialsInput.disabled = false;
+        }
+      });
+    }
 
     // 🔹 Listen for top 10 changes and update the leaderboard table
     const q = query(quancollection, orderBy("score", "desc"), limit(10));
