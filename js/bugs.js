@@ -222,7 +222,14 @@ class BaseBug {
     splat.style.top = (cy - h / 2) + "px";
 
     this.playArea.appendChild(splat);
-
+    console.log("[DEATH SPRITE ADDED]", {
+      bug: this.constructor.name,
+      cx,
+      cy,
+      left: splat.style.left,
+      top: splat.style.top
+    });
+    
     // Fade out a moment later
     requestAnimationFrame(() => {
       splat.style.opacity = "0";
@@ -241,8 +248,9 @@ class BaseBug {
     clearInterval(this.moveInterval);
 
     const { cx, cy } = this.getCenter();
-    this.spawnDeathSprite(cx, cy);
+    console.log("[BUG DIE]", this.constructor.name, { cx, cy });
 
+    this.spawnDeathSprite(cx, cy);
     this.el.remove();
 
     if (typeof window.updateBugMeterFromBugDeath === "function") {
@@ -284,8 +292,8 @@ class AntBug extends BaseBug {
 class FlyBug extends BaseBug {
   constructor(playArea) {
     super(playArea, {
-      hp: 5,                      
-      speed: 2.8,                 
+      hp: 5,
+      speed: 2.8,
       size: 28,
       spriteWidth: 20,
       spriteHeight: 20,
@@ -335,7 +343,7 @@ class RoachBug extends BaseBug {
       spriteWidth: 26,
       spriteHeight: 42,
       img: "./img/bugs/roach/roachBase.png",
-      
+
       walkFrames: [
         "./img/bugs/roach/roachLeft.png",
         "./img/bugs/roach/roachBase.png",
@@ -343,7 +351,7 @@ class RoachBug extends BaseBug {
       ],
       deathFrame: "./img/bugs/roach/roachDead.png",
       animationIntervalMs: 120, // slower steps
-      
+
       reward: 3,
       pathChangeChance: 0.15,
       score: 3
@@ -380,7 +388,7 @@ class SpiderBug extends BaseBug {
       spriteWidth: 58,
       spriteHeight: 64,
       img: "./img/bugs/spider/spiderBase.png",
-      
+
       walkFrames: [
         "./img/bugs/spider/spiderLeft.png",
         "./img/bugs/spider/spiderBase.png",
@@ -388,7 +396,7 @@ class SpiderBug extends BaseBug {
       ],
       deathFrame: "./img/bugs/spider/spiderDead.png",
       animationIntervalMs: 60, // fast, jittery steps
-      
+
       reward: 10,
       pathChangeChance: 0.12,
       score: 10
@@ -462,7 +470,7 @@ class BeetleBug extends BaseBug {
         "./img/bugs/beetle/beetleBack.png",
         "./img/bugs/beetle/beetleBase.png"
       ],
-      
+
       deathFrame: "./img/bugs/beetle/beetleDead.png",
       animationIntervalMs: 130,   // lumbering steps
 

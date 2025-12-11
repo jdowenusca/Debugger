@@ -1158,6 +1158,8 @@ if (playArea && swatter) {
 
   playArea.addEventListener("mouseleave", () => {
     swatter.style.display = "none";
+    lastCursorX = null;
+    lastCursorY = null;
   });
 
   // Swat on click (unchanged)
@@ -1184,6 +1186,15 @@ function handleSwatAt(hitX, hitY) {
     bugsKilled: kills,
     killedBugCenters
   } = currentWeapon.tryAttack(hitX, hitY, activeBugs);
+
+  console.log("[SWAT]", {
+    from: "space-or-click",
+    hitX,
+    hitY,
+    didAttack,
+    kills,
+    killedBugCentersLength: killedBugCenters.length
+  });
 
   if (!didAttack) {
     return;
@@ -1549,14 +1560,28 @@ abilityButtons.forEach((btn) => {
 document.addEventListener("keydown", (event) => {
   if (!spacebarClickEnabled) return;
 
-  // Spacebar
+  // Only care about spacebar
   if (event.code === "Space" || event.key === " ") {
+
+    // 🔹 Ignore auto-repeat while holding space
+    if (event.repeat) {
+      event.preventDefault();
+      return;
+    }
+
     event.preventDefault();
 
+    // Game must be in a valid state
     if (!gameStarted || isPaused) return;
     if (!playArea) return;
+
+    // 🔹 Need a valid cursor position *inside* the play area
     if (lastCursorX == null || lastCursorY == null) return;
 
+    // If the swatter is hidden, don't swat (prevents firing while "outside")
+    if (swatter && swatter.style.display === "none") return;
+
+    // Now this is logically the same as a click at the cursor
     handleSwatAt(lastCursorX, lastCursorY);
   }
 });
