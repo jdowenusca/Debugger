@@ -222,13 +222,6 @@ class BaseBug {
     splat.style.top = (cy - h / 2) + "px";
 
     this.playArea.appendChild(splat);
-    console.log("[DEATH SPRITE ADDED]", {
-      bug: this.constructor.name,
-      cx,
-      cy,
-      left: splat.style.left,
-      top: splat.style.top
-    });
     
     // Fade out a moment later
     requestAnimationFrame(() => {
@@ -248,7 +241,6 @@ class BaseBug {
     clearInterval(this.moveInterval);
 
     const { cx, cy } = this.getCenter();
-    console.log("[BUG DIE]", this.constructor.name, { cx, cy });
 
     this.spawnDeathSprite(cx, cy);
     this.el.remove();

@@ -1144,15 +1144,6 @@ function handleSwatAt(hitX, hitY) {
     killedBugCenters
   } = currentWeapon.tryAttack(hitX, hitY, activeBugs);
 
-  console.log("[SWAT]", {
-    from: "space-or-click",
-    hitX,
-    hitY,
-    didAttack,
-    kills,
-    killedBugCentersLength: killedBugCenters.length
-  });
-
   if (!didAttack) {
     return;
   }
@@ -1517,36 +1508,30 @@ abilityButtons.forEach((btn) => {
 document.addEventListener("keydown", (event) => {
   if (!spacebarClickEnabled) return;
 
-  if (event.code === "Space" || event.key === " ") {
+  // Only care about spacebar presses
+  if (event.code !== "Space" && event.key !== " ") return;
 
-    // Avoid auto-repeat spam when holding space
-    if (event.repeat) {
-      event.preventDefault();
-      return;
-    }
-
+  // Ignore auto-repeat when holding the key down
+  if (event.repeat) {
     event.preventDefault();
-
-    if (!gameStarted || isPaused) return;
-    if (!playArea) return;
-    if (lastCursorX == null || lastCursorY == null) return;
-
-    // Convert play-area coords → viewport coords for a synthetic click
-    const rect = playArea.getBoundingClientRect();
-    const clientX = rect.left + lastCursorX;
-    const clientY = rect.top + lastCursorY;
-
-    const clickEvent = new MouseEvent("click", {
-      bubbles: true,
-      cancelable: true,
-      clientX,
-      clientY,
-      button: 0, // left click
-    });
-
-    // This will go through the exact same click handler as the mouse
-    playArea.dispatchEvent(clickEvent);
+    return;
   }
+
+  event.preventDefault();
+
+  // Game must be running
+  if (!gameStarted || isPaused) return;
+  if (!playArea) return;
+
+  // Need a valid cursor position inside the playArea
+  if (lastCursorX == null || lastCursorY == null) return;
+
+  // Optional safety: if your swatter is hidden, don't swat
+  if (swatter && swatter.style.display === "none") return;
+
+  // 🔹 This is now exactly the same hit logic as a click,
+  // using the same coordinate system as mousemove.
+  handleSwatAt(lastCursorX, lastCursorY);
 });
 
 //-------------------------------------

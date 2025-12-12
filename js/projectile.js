@@ -26,7 +26,6 @@ class BaseProjectile {
     this.playArea = playArea;
     this.x = x;
     this.y = y;
-    console.log("[PROJ]", { x, y, sprite, extraClass });
     this.sprite = sprite;
     this.width = width;
     this.height = height;
@@ -82,8 +81,8 @@ class MeleeHitProjectile extends BaseProjectile {
       sprite: "./img/weapons/general/impactHit.png",   // <--- put your hit marker sprite here
       width: diameter,
       height: diameter,
-      lifetimeMs: 600,
-      fadeOutMs: 200,
+      lifetimeMs: 200,
+      fadeOutMs: 80,
       initialScale: 1.0,
       finalScale: 0.8,
       extraClass: "projectile-melee-hit"

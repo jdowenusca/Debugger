@@ -1235,10 +1235,6 @@ body.game-active::before {
   transition: opacity 2.0s ease, transform 2.0s ease;
   z-index: 6;
   /* slightly above normal bugs */
-  outline: 2px solid red;
-  /* 🔴 TEMP: make it super visible */
-  background: rgba(255, 0, 0, 0.3);
-  /* 🔴 TEMP: semi-transparent red */
 }
 
 .projectile {
@@ -1252,10 +1248,6 @@ body.game-active::before {
   transition:
     opacity 100ms ease-out,
     transform 100ms ease-out;
-  outline: 2px solid lime;
-  /* 🟢 TEMP: outline for hit marker */
-  background: rgba(0, 255, 0, 0.3);
-  /* 🟢 TEMP */
 }
 
 /* Optional specific styling hook for melee hit markers */
